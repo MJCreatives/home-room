@@ -1,0 +1,776 @@
+<title>First Strokes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6;
+    --bg-line: #D9E0E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F7FA;
+    --ink: #1B2733;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #93A0AC;
+    --border: #DCE3EB;
+    --accent: #C1443A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F7E1DE;
+    --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F;
+    --shadow: 220 30% 20%;
+    --guide-line: #B9C3CE;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23;
+      --bg-line: #202B36;
+      --surface: #1C2530;
+      --surface-soft: #212B37;
+      --ink: #E8EDF2;
+      --ink-soft: #9AAAB8;
+      --ink-faint: #64717E;
+      --border: #2B3644;
+      --accent: #E2685C;
+      --accent-ink: #1B0F0D;
+      --accent-soft: #3A2422;
+      --accent-soft-border: #55302C;
+      --focus: #6FB4D8;
+      --shadow: 220 40% 2%;
+      --guide-line: #3C4956;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23;
+    --bg-line: #202B36;
+    --surface: #1C2530;
+    --surface-soft: #212B37;
+    --ink: #E8EDF2;
+    --ink-soft: #9AAAB8;
+    --ink-faint: #64717E;
+    --border: #2B3644;
+    --accent: #E2685C;
+    --accent-ink: #1B0F0D;
+    --accent-soft: #3A2422;
+    --accent-soft-border: #55302C;
+    --focus: #6FB4D8;
+    --shadow: 220 40% 2%;
+    --guide-line: #3C4956;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 90px;
+  }
+
+  .home-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+  .app-header p{
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 50ch;
+  }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .diff-hint{
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  .seg{
+    display: inline-flex;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    background: var(--surface-soft);
+    gap: 3px;
+  }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .check-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .check-row input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .check-row label{
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .quick-row{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .quick-row input[type="text"]{
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface-soft);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    flex: 1;
+    min-width: 160px;
+  }
+  .quick-row input[type="text"]:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .letter-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .letter-chip{ position: relative; }
+  .letter-chip input{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .letter-chip label{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-soft);
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color .12s ease, background .12s ease, color .12s ease;
+  }
+  .letter-chip input:checked + label{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .letter-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .btn{
+    font: inherit;
+    font-weight: 600;
+    font-size: 13.5px;
+    border-radius: 10px;
+    padding: 10px 18px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  select.count-select{
+    font: inherit;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface-soft);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+  }
+  select.count-select:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .actions-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Sheet ---------- */
+  .sheet-toolbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 32px 0 14px;
+    flex-wrap: wrap;
+  }
+  .sheet-toolbar h2{
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .sheet{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 26px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{
+    font-family: "Fraunces", serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .id-lines{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    min-width: 220px;
+  }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line span{ white-space: nowrap; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  #practiceRows{ display: flex; flex-direction: column; gap: 22px; }
+  .practice-row{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    break-inside: avoid;
+  }
+  .row-label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    flex-shrink: 0;
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .row-label .row-letter{
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .row-label .row-num{
+    font-size: 10.5px;
+    color: var(--ink-faint);
+  }
+  .row-svg-wrap{
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .row-svg-wrap svg{
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .empty-state{
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+
+  .sheet-footnote{
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  footer.page-footer{
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Reading &amp; Writing</p>
+      <h1>First Strokes</h1>
+      <p>Pick a few letters, choose a case, and get a tracing sheet &mdash; the first letter on every line shows numbered arrows for stroke order, followed by faded letters to trace and blank lines to practice.</p>
+    </div>
+    <span class="badge" id="statusBadge">3 letters selected</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Practice sheet settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Case</span>
+      <div class="seg" role="radiogroup" aria-label="Case">
+        <input type="radio" name="letcase" id="case-upper" value="upper" checked>
+        <label for="case-upper">Uppercase</label>
+        <input type="radio" name="letcase" id="case-lower" value="lower">
+        <label for="case-lower">Lowercase</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Quick-select from a word</span>
+      <div class="quick-row">
+        <input type="text" id="quickWord" placeholder="e.g. a name, a spelling word&hellip;">
+        <button class="btn btn-ghost btn-small" id="quickWordBtn" type="button">Use this word</button>
+      </div>
+      <p class="diff-hint">Sets the lines to match the word, in order &mdash; repeated letters get their own line.</p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Letters</span>
+      <div class="letter-grid" id="letterGrid"></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all A&ndash;Z</button>
+        <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear all</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Stroke guide</span>
+      <div class="check-row">
+        <input type="checkbox" id="showArrows" checked>
+        <label for="showArrows">Show numbered stroke-order arrows on the first letter</label>
+      </div>
+      <p class="diff-hint">Turn off to show a plain reference letter instead &mdash; handy once the arrows aren't needed anymore.</p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Trace repeats per line</span>
+      <select class="count-select" id="repeatSelect">
+        <option value="3">3 faded traces</option>
+        <option value="4" selected>4 faded traces</option>
+        <option value="5">5 faded traces</option>
+        <option value="6">6 faded traces</option>
+      </select>
+    </div>
+
+    <div class="actions-row">
+      <span></span>
+      <button class="btn btn-primary" id="printBtn">Print practice sheet</button>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Practice sheet preview</h2>
+  </div>
+
+  <section>
+    <div class="sheet" id="practiceSheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Letter Practice</h3>
+          <div class="meta" id="sheetMeta">Uppercase &middot; A, B, C</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+      <div id="practiceRows"></div>
+      <div class="sheet-footnote" id="sheetFootnote">Numbers show stroke order, arrows show direction. Trace the faded letters, then write it on your own on the blank line.</div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Every letter is drawn as vector strokes, so it prints crisp at any size.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var TOP = 15, MID = 65, BASE = 105, DESC = 125;
+
+  var UPPER = {
+    A: [ {d:'M50,15 L25,105', s:[50,15]}, {d:'M50,15 L75,105', s:[50,15]}, {d:'M35,68 L65,68', s:[35,68]} ],
+    B: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 C50,15 55,26 55,38 C55,48 50,60 30,60', s:[30,15]}, {d:'M30,60 C55,60 62,73 62,83 C62,94 52,105 30,105', s:[30,60]} ],
+    C: [ {d:'M67,28 C58,17 38,16 28,32 C19,47 19,73 28,88 C38,104 58,103 67,92', s:[67,28]} ],
+    D: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 C58,15 68,33 68,55 C68,77 58,105 30,105', s:[30,15]} ],
+    E: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 L70,15', s:[30,15]}, {d:'M30,60 L58,60', s:[30,60]}, {d:'M30,105 L70,105', s:[30,105]} ],
+    F: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 L70,15', s:[30,15]}, {d:'M30,60 L58,60', s:[30,60]} ],
+    G: [ {d:'M68,32 C58,18 36,16 27,32 C18,47 18,73 27,88 C37,104 58,104 67,90 L67,68', s:[68,32]}, {d:'M67,68 L46,68', s:[67,68]} ],
+    H: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M70,15 L70,105', s:[70,15]}, {d:'M30,60 L70,60', s:[30,60]} ],
+    I: [ {d:'M50,15 L50,105', s:[50,15]} ],
+    J: [ {d:'M62,15 L62,82 C62,100 48,107 35,101', s:[62,15]} ],
+    K: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M32,60 L70,15', s:[32,60]}, {d:'M32,60 L70,105', s:[32,60]} ],
+    L: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,105 L70,105', s:[30,105]} ],
+    M: [ {d:'M25,15 L25,105', s:[25,15]}, {d:'M25,15 L50,68', s:[25,15]}, {d:'M50,68 L75,15', s:[50,68]}, {d:'M75,15 L75,105', s:[75,15]} ],
+    N: [ {d:'M25,15 L25,105', s:[25,15]}, {d:'M25,15 L75,105', s:[25,15]}, {d:'M75,15 L75,105', s:[75,15]} ],
+    O: [ {d:'M50,15 C74,15 83,36 83,60 C83,84 74,105 50,105 C26,105 17,84 17,60 C17,36 26,15 50,15', s:[50,15]} ],
+    P: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 C54,15 61,26 61,39 C61,51 54,62 30,62', s:[30,15]} ],
+    Q: [ {d:'M50,15 C74,15 83,36 83,60 C83,84 74,105 50,105 C26,105 17,84 17,60 C17,36 26,15 50,15', s:[50,15]}, {d:'M58,88 L80,110', s:[58,88]} ],
+    R: [ {d:'M30,15 L30,105', s:[30,15]}, {d:'M30,15 C54,15 61,26 61,39 C61,51 54,62 30,62', s:[30,15]}, {d:'M42,62 L70,105', s:[42,62]} ],
+    S: [ {d:'M65,28 C58,17 38,15 30,23 C20,32 24,45 40,50 C58,55 68,64 62,80 C56,97 34,102 25,90', s:[65,28]} ],
+    T: [ {d:'M25,15 L75,15', s:[25,15]}, {d:'M50,15 L50,105', s:[50,15]} ],
+    U: [ {d:'M25,15 L25,80 C25,100 40,105 50,105 C60,105 75,100 75,80 L75,15', s:[25,15]} ],
+    V: [ {d:'M25,15 L50,105', s:[25,15]}, {d:'M75,15 L50,105', s:[75,15]} ],
+    W: [ {d:'M15,15 L32,105', s:[15,15]}, {d:'M32,105 L50,50', s:[32,105]}, {d:'M50,50 L68,105', s:[50,50]}, {d:'M68,105 L85,15', s:[68,105]} ],
+    X: [ {d:'M25,15 L75,105', s:[25,15]}, {d:'M75,15 L25,105', s:[75,15]} ],
+    Y: [ {d:'M25,15 L50,60', s:[25,15]}, {d:'M75,15 L50,60', s:[75,15]}, {d:'M50,60 L50,105', s:[50,60]} ],
+    Z: [ {d:'M25,15 L75,15', s:[25,15]}, {d:'M75,15 L25,105', s:[75,15]}, {d:'M25,105 L75,105', s:[25,105]} ]
+  };
+
+  var LOWER = {
+    A: [ {d:'M63,72 C63,68 56,66 50,66 C39,66 33,74 33,86 C33,98 42,105 52,105 C61,105 63,99 63,91 L63,105', s:[63,72]} ],
+    B: [ {d:'M33,15 L33,105', s:[33,15]}, {d:'M33,80 C33,69 44,66 52,66 C62,66 68,74 68,87 C68,99 58,105 48,105 C40,105 33,100 33,90', s:[33,80]} ],
+    C: [ {d:'M65,74 C60,68 53,66 48,66 C38,66 33,74 33,86 C33,98 42,105 50,105 C57,105 62,102 65,96', s:[65,74]} ],
+    D: [ {d:'M63,15 L63,105', s:[63,15]}, {d:'M63,80 C63,69 52,66 44,66 C34,66 29,74 29,86 C29,98 38,105 48,105 C56,105 61,100 63,92', s:[63,80]} ],
+    E: [ {d:'M33,88 L64,88 C64,76 55,66 47,66 C36,66 30,74 30,86 C30,98 40,105 50,105 C58,105 63,101 65,96', s:[33,88]} ],
+    F: [ {d:'M60,26 C60,18 53,15 47,15 C39,15 34,22 34,35 L34,105', s:[60,26]}, {d:'M24,55 L50,55', s:[24,55]} ],
+    G: [ {d:'M63,72 C63,68 56,66 50,66 C39,66 33,74 33,86 C33,98 42,105 52,105 C61,105 63,99 63,91 L63,109 C63,121 54,126 44,124', s:[63,72]} ],
+    H: [ {d:'M33,15 L33,105', s:[33,15]}, {d:'M33,80 C33,69 45,66 52,66 C62,66 65,73 65,83 L65,105', s:[33,80]} ],
+    I: [ {d:'M50,66 L50,105', s:[50,66]}, {dot:[50,42]} ],
+    J: [ {d:'M52,66 L52,110 C52,122 44,125 36,122', s:[52,66]}, {dot:[52,42]} ],
+    K: [ {d:'M33,15 L33,105', s:[33,15]}, {d:'M36,80 L65,66', s:[36,80]}, {d:'M36,80 L68,105', s:[36,80]} ],
+    L: [ {d:'M50,15 L50,105', s:[50,15]} ],
+    M: [ {d:'M25,66 L25,105', s:[25,66]}, {d:'M25,81 C25,70 35,66 42,66 C50,66 53,73 53,83 L53,105', s:[25,81]}, {d:'M53,81 C53,70 63,66 70,66 C78,66 81,73 81,83 L81,105', s:[53,81]} ],
+    N: [ {d:'M33,66 L33,105', s:[33,66]}, {d:'M33,81 C33,70 45,66 52,66 C62,66 65,73 65,83 L65,105', s:[33,81]} ],
+    O: [ {d:'M65,86 C65,73 58,66 50,66 C40,66 33,74 33,86 C33,98 42,105 50,105 C58,105 65,99 65,86', s:[65,86]} ],
+    P: [ {d:'M33,66 L33,125', s:[33,66]}, {d:'M33,80 C33,69 44,66 52,66 C62,66 68,74 68,87 C68,99 58,105 48,105 C40,105 33,100 33,90', s:[33,80]} ],
+    Q: [ {d:'M63,80 C63,69 52,66 44,66 C34,66 29,74 29,86 C29,98 38,105 48,105 C56,105 61,100 63,92', s:[63,80]}, {d:'M63,66 L63,125', s:[63,66]} ],
+    R: [ {d:'M35,66 L35,105', s:[35,66]}, {d:'M35,73 C35,67 45,65 52,67 C58,69 60,71 60,73', s:[35,73]} ],
+    S: [ {d:'M62,74 C58,68 44,66 38,73 C31,80 38,85 50,87 C62,89 68,94 60,101 C52,108 38,106 33,98', s:[62,74]} ],
+    T: [ {d:'M48,32 L48,98 C48,104 53,106 60,103', s:[48,32]}, {d:'M30,66 L62,66', s:[30,66]} ],
+    U: [ {d:'M33,66 L33,90 C33,101 42,105 50,105 C58,105 65,101 65,90 L65,66', s:[33,66]} ],
+    V: [ {d:'M33,66 L50,105', s:[33,66]}, {d:'M67,66 L50,105', s:[67,66]} ],
+    W: [ {d:'M25,66 L36,105', s:[25,66]}, {d:'M36,105 L50,76', s:[36,105]}, {d:'M50,76 L64,105', s:[50,76]}, {d:'M64,105 L75,66', s:[64,105]} ],
+    X: [ {d:'M33,66 L67,105', s:[33,66]}, {d:'M67,66 L33,105', s:[67,66]} ],
+    Y: [ {d:'M33,66 L50,95', s:[33,66]}, {d:'M67,66 L38,122', s:[67,66]} ],
+    Z: [ {d:'M33,66 L67,66', s:[33,66]}, {d:'M67,66 L33,105', s:[67,66]}, {d:'M33,105 L67,105', s:[33,105]} ]
+  };
+
+  var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  var CELL_W = 100, CELL_GAP = 10, SLOT = CELL_W + CELL_GAP;
+  var BLANK_SLOTS = 3;
+
+  var els = {
+    caseInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="letcase"]')),
+    quickWord: document.getElementById('quickWord'),
+    quickWordBtn: document.getElementById('quickWordBtn'),
+    letterGrid: document.getElementById('letterGrid'),
+    showArrows: document.getElementById('showArrows'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    repeatSelect: document.getElementById('repeatSelect'),
+    printBtn: document.getElementById('printBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetMeta: document.getElementById('sheetMeta'),
+    sheetFootnote: document.getElementById('sheetFootnote'),
+    practiceRows: document.getElementById('practiceRows')
+  };
+
+  var sequence = ['A', 'B', 'C'];
+
+  function buildLetterGrid(){
+    els.letterGrid.innerHTML = '';
+    LETTERS.forEach(function(L){
+      var wrap = document.createElement('div');
+      wrap.className = 'letter-chip';
+      wrap.innerHTML =
+        '<input type="checkbox" id="let-' + L + '" value="' + L + '">' +
+        '<label for="let-' + L + '">' + L + '</label>';
+      els.letterGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.letterGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var L = inp.value;
+        if (inp.checked){
+          if (sequence.indexOf(L) === -1) sequence.push(L);
+        } else {
+          sequence = sequence.filter(function(x){ return x !== L; });
+        }
+        render();
+      });
+    });
+  }
+
+  function syncChipStates(){
+    LETTERS.forEach(function(L){
+      var inp = document.getElementById('let-' + L);
+      if (inp) inp.checked = sequence.indexOf(L) !== -1;
+    });
+  }
+
+  function currentCase(){
+    var checked = els.caseInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'upper';
+  }
+
+  function strokeGroup(strokes, mode){
+    // mode: 'arrows' (solid ink + numbered stroke arrows), 'solid' (plain solid reference letter), 'trace' (faded dashed)
+    var parts = [];
+    if (mode === 'arrows'){
+      parts.push('<defs><marker id="arrowhead" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path></marker></defs>');
+    }
+    strokes.forEach(function(st, idx){
+      if (st.dot){
+        parts.push('<circle cx="' + st.dot[0] + '" cy="' + st.dot[1] + '" r="4.5" fill="' + (mode === 'trace' ? 'var(--ink-faint)' : 'var(--ink)') + '"></circle>');
+        if (mode === 'arrows'){
+          parts.push(numberBadge(st.dot[0] + 12, st.dot[1] - 6, idx + 1));
+        }
+      } else if (mode === 'arrows'){
+        parts.push('<path d="' + st.d + '" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowhead)"></path>');
+        parts.push(numberBadge(st.s[0], st.s[1], idx + 1));
+      } else if (mode === 'solid'){
+        parts.push('<path d="' + st.d + '" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>');
+      } else {
+        parts.push('<path d="' + st.d + '" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4.5" opacity="0.85"></path>');
+      }
+    });
+    return parts.join('');
+  }
+
+  function numberBadge(x, y, n){
+    return '<g transform="translate(' + x + ',' + y + ')">' +
+      '<circle r="8" fill="var(--accent)"></circle>' +
+      '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600" fill="var(--accent-ink)">' + n + '</text>' +
+      '</g>';
+  }
+
+  function buildRowSVG(letter, caseMode, repeats, showArrows){
+    var data = caseMode === 'upper' ? UPPER[letter] : LOWER[letter];
+    var totalSlots = 1 + repeats + BLANK_SLOTS;
+    var width = totalSlots * SLOT;
+    var height = 145;
+    var parts = [];
+    parts.push('<svg viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Practice line for the letter ' + letter + '">');
+    // guide lines
+    parts.push('<line x1="0" y1="' + TOP + '" x2="' + width + '" y2="' + TOP + '" stroke="var(--guide-line)" stroke-width="1"></line>');
+    parts.push('<line x1="0" y1="' + MID + '" x2="' + width + '" y2="' + MID + '" stroke="var(--guide-line)" stroke-width="1" stroke-dasharray="3 4"></line>');
+    parts.push('<line x1="0" y1="' + BASE + '" x2="' + width + '" y2="' + BASE + '" stroke="var(--ink-soft)" stroke-width="1.75"></line>');
+    parts.push('<line x1="0" y1="' + DESC + '" x2="' + width + '" y2="' + DESC + '" stroke="var(--guide-line)" stroke-width="1"></line>');
+    // reference glyph (slot 0) — numbered arrows, or a plain solid letter
+    parts.push('<g transform="translate(5,0)">' + strokeGroup(data, showArrows ? 'arrows' : 'solid') + '</g>');
+    // faded trace repeats
+    for (var i = 1; i <= repeats; i++){
+      parts.push('<g transform="translate(' + (i * SLOT + 5) + ',0)">' + strokeGroup(data, 'trace') + '</g>');
+    }
+    parts.push('</svg>');
+    return parts.join('');
+  }
+
+  function render(){
+    syncChipStates();
+    var caseMode = currentCase();
+    var repeats = parseInt(els.repeatSelect.value, 10);
+    var showArrows = els.showArrows.checked;
+
+    els.practiceRows.innerHTML = '';
+    if (!sequence.length){
+      els.practiceRows.innerHTML = '<div class="empty-state">Pick at least one letter to build a practice sheet.</div>';
+    } else {
+      sequence.forEach(function(letter, idx){
+        var row = document.createElement('div');
+        row.className = 'practice-row';
+        var displayLetter = caseMode === 'upper' ? letter : letter.toLowerCase();
+        row.innerHTML =
+          '<div class="row-label"><span class="row-num">' + (idx + 1) + '</span><span class="row-letter">' + displayLetter + '</span></div>' +
+          '<div class="row-svg-wrap">' + buildRowSVG(letter, caseMode, repeats, showArrows) + '</div>';
+        els.practiceRows.appendChild(row);
+      });
+    }
+
+    var caseLabel = caseMode === 'upper' ? 'Uppercase' : 'Lowercase';
+    var listLabel = sequence.length ? sequence.join(', ') : 'none selected';
+    els.sheetMeta.textContent = caseLabel + ' · ' + listLabel;
+    els.statusBadge.textContent = sequence.length + ' letter' + (sequence.length === 1 ? '' : 's') + ' selected';
+    els.sheetFootnote.textContent = showArrows
+      ? 'Numbers show stroke order, arrows show direction. Trace the faded letters, then write it on your own on the blank line.'
+      : 'Trace the faded letters, then write it on your own on the blank line.';
+  }
+
+  els.caseInputs.forEach(function(i){ i.addEventListener('change', render); });
+  els.repeatSelect.addEventListener('change', render);
+  els.showArrows.addEventListener('change', render);
+
+  els.quickWordBtn.addEventListener('click', function(){
+    var raw = els.quickWord.value || '';
+    var letters = raw.toUpperCase().split('').filter(function(ch){ return ch >= 'A' && ch <= 'Z'; });
+    sequence = letters;
+    render();
+  });
+  els.quickWord.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){ e.preventDefault(); els.quickWordBtn.click(); }
+  });
+
+  els.selectAllBtn.addEventListener('click', function(){ sequence = LETTERS.slice(); render(); });
+  els.clearAllBtn.addEventListener('click', function(){ sequence = []; render(); });
+
+  function printInNewWindow(){
+    // Artifacts can render inside a sandboxed frame where window.print() is silently
+    // blocked, so open the page's own markup in a fresh top-level window and print that.
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      window.print();
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body>' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+
+    var fired = false;
+    function go(){
+      if (fired) return;
+      fired = true;
+      printWin.focus();
+      printWin.print();
+    }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', printInNewWindow);
+
+  buildLetterGrid();
+  render();
+})();
+</script>

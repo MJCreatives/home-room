@@ -1,0 +1,931 @@
+<title>Sum &amp; Solve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------- Tokens ---------- */
+  :root{
+    --bg: #EEF1F6;
+    --bg-line: #D9E0E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F7FA;
+    --ink: #1B2733;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #93A0AC;
+    --border: #DCE3EB;
+    --accent: #C1443A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F7E1DE;
+    --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F;
+    --shadow: 220 30% 20%;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23;
+      --bg-line: #202B36;
+      --surface: #1C2530;
+      --surface-soft: #212B37;
+      --ink: #E8EDF2;
+      --ink-soft: #9AAAB8;
+      --ink-faint: #64717E;
+      --border: #2B3644;
+      --accent: #E2685C;
+      --accent-ink: #1B0F0D;
+      --accent-soft: #3A2422;
+      --accent-soft-border: #55302C;
+      --focus: #6FB4D8;
+      --shadow: 220 40% 2%;
+    }
+  }
+
+  :root[data-theme="dark"]{
+    --bg: #141B23;
+    --bg-line: #202B36;
+    --surface: #1C2530;
+    --surface-soft: #212B37;
+    --ink: #E8EDF2;
+    --ink-soft: #9AAAB8;
+    --ink-faint: #64717E;
+    --border: #2B3644;
+    --accent: #E2685C;
+    --accent-ink: #1B0F0D;
+    --accent-soft: #3A2422;
+    --accent-soft-border: #55302C;
+    --focus: #6FB4D8;
+    --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  .home-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .app-header .amp{ color: var(--accent); font-style: italic; }
+  .app-header p{
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 46ch;
+  }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  /* ---------- Controls card ---------- */
+  .panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .op-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 560px){
+    .op-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  .op-chip{ position: relative; }
+  .op-chip input{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .op-chip label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px 10px;
+    background: var(--surface-soft);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .op-chip label .sym{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .op-chip label .name{
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .op-chip input:checked + label{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .op-chip input:checked + label .sym{ color: var(--accent); }
+  .op-chip input:checked + label .name{ color: var(--ink); }
+  .op-chip input:focus-visible + label{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .seg{
+    display: inline-flex;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    background: var(--surface-soft);
+    gap: 3px;
+  }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .seg input:focus-visible + label{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .diff-hint{
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  select.count-select{
+    font: inherit;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface-soft);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+  }
+  select.count-select:focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .actions-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .btn{
+    font: inherit;
+    font-weight: 600;
+    font-size: 14.5px;
+    border-radius: 10px;
+    padding: 12px 22px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-primary:disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-ghost{
+    background: transparent;
+    border-color: var(--border);
+    color: var(--ink);
+  }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .error-text{
+    font-size: 13px;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  /* ---------- Worksheet ---------- */
+  .sheet-toolbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 32px 0 14px;
+    flex-wrap: wrap;
+  }
+  .sheet-toolbar h2{
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{
+    font-family: "Fraunces", serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .id-lines{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    min-width: 220px;
+  }
+  .id-lines .line{
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .id-lines .line span{ white-space: nowrap; }
+  .id-lines .line .rule{
+    flex: 1;
+    border-bottom: 1px solid var(--ink-faint);
+    height: 1px;
+  }
+
+  .problem-grid{
+    --size-scale: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 18px;
+  }
+  @media (max-width: 620px){
+    .problem-grid{ grid-template-columns: 1fr; }
+  }
+  .problem-grid.size-large{ --size-scale: 1.3; }
+  .problem-grid.size-xl{ --size-scale: 1.65; }
+  .problem-grid.layout-vertical{
+    grid-template-columns: repeat(auto-fill, minmax(calc(130px * var(--size-scale)), 1fr));
+    row-gap: calc(30px * var(--size-scale));
+    column-gap: 20px;
+  }
+  .problem{
+    display: flex;
+    align-items: baseline;
+    gap: calc(10px * var(--size-scale));
+    font-family: "IBM Plex Mono", monospace;
+    font-size: calc(16px * var(--size-scale));
+    font-variant-numeric: tabular-nums;
+    break-inside: avoid;
+  }
+  .problem .num{
+    color: var(--ink-faint);
+    font-size: calc(13px * var(--size-scale));
+    min-width: calc(22px * var(--size-scale));
+  }
+  .problem .expr{ color: var(--ink); white-space: nowrap; }
+  .problem .answer-rule{
+    flex: 1;
+    border-bottom: 1.5px dotted var(--ink-faint);
+    min-width: calc(40px * var(--size-scale));
+    height: 1px;
+    align-self: center;
+  }
+  .problem.is-answer .expr{ color: var(--ink-soft); }
+  .problem.is-answer .result{
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---------- Vertical (stacked) problems ---------- */
+  .vproblem{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(6px * var(--size-scale));
+    break-inside: avoid;
+  }
+  .vproblem .vp-num{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: calc(12px * var(--size-scale));
+    color: var(--ink-faint);
+  }
+  .vert-stack{
+    display: inline-grid;
+    grid-template-columns: 1.3em auto;
+    row-gap: 2px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: calc(18px * var(--size-scale));
+    font-variant-numeric: tabular-nums;
+  }
+  .vert-stack .vs-r1{
+    grid-column: 1 / 3;
+    text-align: right;
+    padding-right: 2px;
+  }
+  .vert-stack .vs-op{
+    align-self: end;
+    text-align: left;
+    padding-bottom: 4px;
+    color: var(--ink-soft);
+  }
+  .vert-stack .vs-r2{
+    text-align: right;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 4px;
+  }
+  .vert-stack .vs-answer{
+    grid-column: 1 / 3;
+    text-align: right;
+    min-height: 1.5em;
+    padding-top: 6px;
+  }
+  .vert-stack .vs-answer.filled{
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .longdiv{
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: calc(18px * var(--size-scale));
+    font-variant-numeric: tabular-nums;
+  }
+  .longdiv .ld-quotient{
+    grid-column: 2;
+    grid-row: 1;
+    border-bottom: 2px solid var(--ink);
+    text-align: center;
+    min-width: 2.6em;
+    padding: 0 6px 4px;
+  }
+  .longdiv .ld-quotient.filled{
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .longdiv .ld-divisor{
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    padding: 0 6px 4px 2px;
+    color: var(--ink-soft);
+  }
+  .longdiv .ld-dividend{
+    grid-column: 2;
+    grid-row: 2;
+    border-left: 2px solid var(--ink);
+    padding: 4px 8px 4px 8px;
+    align-self: end;
+  }
+
+  .empty-state{
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+
+  .answer-key-section{ margin-top: 24px; }
+  .answer-key-section .sheet{ padding: 28px 40px; }
+  .answer-key-section .problem-grid{
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 12px;
+    column-gap: 20px;
+  }
+  @media (max-width: 720px){
+    .answer-key-section .problem-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  .answer-key-section[hidden]{ display: none; }
+
+  footer{
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet, .answer-key-section .sheet{
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+    }
+    .answer-key-section{ margin-top: 0; }
+    body:not(.print-answers) .answer-key-section{ display: none !important; }
+    body.print-answers .worksheet-section{ display: none !important; }
+    .sheet-toolbar{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <h1>Sum <span class="amp">&amp;</span> Solve</h1>
+      <p>Build a random arithmetic worksheet, pick a difficulty, print it with a matching answer key.</p>
+    </div>
+    <span class="badge" id="statusBadge">20 problems ready</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Worksheet settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Operations</span>
+      <div class="op-grid" id="opGrid">
+        <div class="op-chip">
+          <input type="checkbox" id="op-add" value="add" checked>
+          <label for="op-add"><span class="sym">+</span><span class="name">Addition</span></label>
+        </div>
+        <div class="op-chip">
+          <input type="checkbox" id="op-sub" value="sub" checked>
+          <label for="op-sub"><span class="sym">&minus;</span><span class="name">Subtraction</span></label>
+        </div>
+        <div class="op-chip">
+          <input type="checkbox" id="op-mul" value="mul" checked>
+          <label for="op-mul"><span class="sym">&times;</span><span class="name">Multiplication</span></label>
+        </div>
+        <div class="op-chip">
+          <input type="checkbox" id="op-div" value="div" checked>
+          <label for="op-div"><span class="sym">&divide;</span><span class="name">Division</span></label>
+        </div>
+      </div>
+      <p class="error-text no-print" id="opError" hidden>Pick at least one operation.</p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Layout</span>
+      <div class="seg" role="radiogroup" aria-label="Layout">
+        <input type="radio" name="layout" id="layout-horizontal" value="horizontal" checked>
+        <label for="layout-horizontal">Horizontal</label>
+        <input type="radio" name="layout" id="layout-vertical" value="vertical">
+        <label for="layout-vertical">Vertical</label>
+      </div>
+      <p class="diff-hint">Vertical stacks each problem in columns &mdash; good for practicing carrying and borrowing.</p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Text size</span>
+      <div class="seg" role="radiogroup" aria-label="Text size">
+        <input type="radio" name="textsize" id="size-standard" value="standard" checked>
+        <label for="size-standard">Standard</label>
+        <input type="radio" name="textsize" id="size-large" value="large">
+        <label for="size-large">Large</label>
+        <input type="radio" name="textsize" id="size-xl" value="xl">
+        <label for="size-xl">X-Large</label>
+      </div>
+      <p class="diff-hint">Bigger numbers on the worksheet &mdash; handy for younger kids or printing to read from farther away.</p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Difficulty</span>
+      <div class="seg" role="radiogroup" aria-label="Difficulty">
+        <input type="radio" name="difficulty" id="diff-easy" value="easy">
+        <label for="diff-easy">Easy</label>
+        <input type="radio" name="difficulty" id="diff-medium" value="medium" checked>
+        <label for="diff-medium">Medium</label>
+        <input type="radio" name="difficulty" id="diff-hard" value="hard">
+        <label for="diff-hard">Hard</label>
+      </div>
+      <p class="diff-hint" id="diffHint"></p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Problem count</span>
+      <select class="count-select" id="countSelect">
+        <option value="10">10 problems</option>
+        <option value="15">15 problems</option>
+        <option value="20" selected>20 problems</option>
+        <option value="25">25 problems</option>
+        <option value="30">30 problems</option>
+        <option value="40">40 problems</option>
+      </select>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="generateBtn">Generate worksheet</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="printWorksheetBtn">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print" style="margin-top:32px;">
+    <h2>Worksheet preview</h2>
+  </div>
+
+  <section class="worksheet-section">
+    <div class="sheet" id="worksheetSheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Math Practice</h3>
+          <div class="meta" id="worksheetMeta">Medium &middot; Addition, Subtraction, Multiplication, Division</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+          <div class="line"><span>Score</span><span class="rule"></span></div>
+        </div>
+      </div>
+      <div class="problem-grid" id="problemGrid"></div>
+    </div>
+  </section>
+
+  <section class="answer-key-section" id="answerKeySection" hidden>
+    <div class="sheet-toolbar">
+      <h2>Answer key</h2>
+    </div>
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Answer Key</h3>
+          <div class="meta" id="answerMeta">Medium &middot; Addition, Subtraction, Multiplication, Division</div>
+        </div>
+      </div>
+      <div class="problem-grid" id="answerGrid"></div>
+    </div>
+  </section>
+
+  <div class="no-print" style="margin-top:16px;">
+    <button class="btn btn-ghost" id="toggleAnswersBtn">Show answer key on screen</button>
+  </div>
+
+  <footer class="no-print">Every click generates a fresh, randomly drawn set &mdash; nothing here repeats problem for problem.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DIFFICULTY_HINTS = {
+    easy: "Single-digit addition & subtraction, times tables through 9, matching division facts.",
+    medium: "Two-digit addition & subtraction, times tables through 12, matching division facts.",
+    hard: "Three-digit addition & subtraction, two-digit × two-digit multiplication, larger division facts."
+  };
+
+  var OP_LABELS = { add: "Addition", sub: "Subtraction", mul: "Multiplication", div: "Division" };
+  var OP_SYMBOL = { add: "+", sub: "−", mul: "×", div: "÷" };
+
+  var els = {
+    opInputs: Array.prototype.slice.call(document.querySelectorAll('.op-chip input')),
+    diffInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="difficulty"]')),
+    layoutInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="layout"]')),
+    sizeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="textsize"]')),
+    diffHint: document.getElementById('diffHint'),
+    countSelect: document.getElementById('countSelect'),
+    generateBtn: document.getElementById('generateBtn'),
+    printWorksheetBtn: document.getElementById('printWorksheetBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    toggleAnswersBtn: document.getElementById('toggleAnswersBtn'),
+    opError: document.getElementById('opError'),
+    problemGrid: document.getElementById('problemGrid'),
+    answerGrid: document.getElementById('answerGrid'),
+    worksheetMeta: document.getElementById('worksheetMeta'),
+    answerMeta: document.getElementById('answerMeta'),
+    answerKeySection: document.getElementById('answerKeySection'),
+    statusBadge: document.getElementById('statusBadge')
+  };
+
+  function randInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function currentDifficulty(){
+    var checked = els.diffInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'medium';
+  }
+
+  function currentLayout(){
+    var checked = els.layoutInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'horizontal';
+  }
+
+  function currentTextSize(){
+    var checked = els.sizeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'standard';
+  }
+
+  function currentOps(){
+    return els.opInputs.filter(function(i){ return i.checked; }).map(function(i){ return i.value; });
+  }
+
+  function genAdd(diff){
+    var ranges = { easy:[1,9], medium:[10,99], hard:[100,999] };
+    var r = ranges[diff];
+    var a = randInt(r[0], r[1]);
+    var b = randInt(r[0], r[1]);
+    return { op: 'add', a: a, b: b, answer: a + b };
+  }
+
+  function genSub(diff){
+    var ranges = { easy:[1,9], medium:[10,99], hard:[100,999] };
+    var r = ranges[diff];
+    var a = randInt(r[0], r[1]);
+    var b = randInt(r[0], r[1]);
+    if (b > a){ var t = a; a = b; b = t; }
+    return { op: 'sub', a: a, b: b, answer: a - b };
+  }
+
+  function genMul(diff){
+    var a, b;
+    if (diff === 'easy'){ a = randInt(1,9); b = randInt(1,9); }
+    else if (diff === 'medium'){ a = randInt(2,12); b = randInt(2,12); }
+    else { a = randInt(11,25); b = randInt(11,25); }
+    return { op: 'mul', a: a, b: b, answer: a * b };
+  }
+
+  function genDiv(diff){
+    var divisor, quotient;
+    if (diff === 'easy'){ divisor = randInt(1,9); quotient = randInt(1,9); }
+    else if (diff === 'medium'){ divisor = randInt(2,12); quotient = randInt(2,12); }
+    else { divisor = randInt(2,12); quotient = randInt(11,25); }
+    var dividend = divisor * quotient;
+    return { op: 'div', a: dividend, b: divisor, answer: quotient };
+  }
+
+  var GENERATORS = { add: genAdd, sub: genSub, mul: genMul, div: genDiv };
+
+  function horizontalExpr(p){
+    return p.a + ' ' + OP_SYMBOL[p.op] + ' ' + p.b;
+  }
+
+  function buildProblems(ops, diff, count){
+    var out = [];
+    for (var i = 0; i < count; i++){
+      var op = ops[randInt(0, ops.length - 1)];
+      out.push(GENERATORS[op](diff));
+    }
+    return out;
+  }
+
+  function verticalMarkup(p, showAnswer){
+    if (p.op === 'div'){
+      return '' +
+        '<div class="longdiv">' +
+          '<div class="ld-quotient' + (showAnswer ? ' filled' : '') + '">' + (showAnswer ? p.answer : '') + '</div>' +
+          '<div class="ld-divisor">' + p.b + '</div>' +
+          '<div class="ld-dividend">' + p.a + '</div>' +
+        '</div>';
+    }
+    return '' +
+      '<div class="vert-stack">' +
+        '<div class="vs-r1">' + p.a + '</div>' +
+        '<div class="vs-op">' + OP_SYMBOL[p.op] + '</div>' +
+        '<div class="vs-r2">' + p.b + '</div>' +
+        '<div class="vs-answer' + (showAnswer ? ' filled' : '') + '">' + (showAnswer ? p.answer : '') + '</div>' +
+      '</div>';
+  }
+
+  function renderWorksheet(problems, layout, textSize){
+    els.problemGrid.classList.toggle('layout-vertical', layout === 'vertical');
+    els.problemGrid.classList.toggle('size-large', textSize === 'large');
+    els.problemGrid.classList.toggle('size-xl', textSize === 'xl');
+    els.problemGrid.innerHTML = '';
+    if (!problems.length){
+      els.problemGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Pick at least one operation and generate a worksheet.</div>';
+      return;
+    }
+    problems.forEach(function(p, idx){
+      var row = document.createElement('div');
+      if (layout === 'vertical'){
+        row.className = 'vproblem';
+        row.innerHTML = '<span class="vp-num">' + (idx + 1) + '.</span>' + verticalMarkup(p, false);
+      } else {
+        row.className = 'problem';
+        row.innerHTML =
+          '<span class="num">' + (idx + 1) + '.</span>' +
+          '<span class="expr">' + horizontalExpr(p) + ' =</span>' +
+          '<span class="answer-rule"></span>';
+      }
+      els.problemGrid.appendChild(row);
+    });
+  }
+
+  function renderAnswers(problems){
+    els.answerGrid.innerHTML = '';
+    problems.forEach(function(p, idx){
+      var row = document.createElement('div');
+      row.className = 'problem is-answer';
+      row.innerHTML =
+        '<span class="num">' + (idx + 1) + '.</span>' +
+        '<span class="expr">' + horizontalExpr(p) + ' =</span>' +
+        '<span class="result">' + p.answer + '</span>';
+      els.answerGrid.appendChild(row);
+    });
+  }
+
+  function opsLabel(ops){
+    return ops.map(function(o){ return OP_LABELS[o]; }).join(', ');
+  }
+
+  function generate(){
+    var ops = currentOps();
+    var diff = currentDifficulty();
+    var layout = currentLayout();
+    var textSize = currentTextSize();
+    var count = parseInt(els.countSelect.value, 10);
+
+    if (!ops.length){
+      els.opError.hidden = false;
+      els.generateBtn.disabled = true;
+      renderWorksheet([], layout, textSize);
+      renderAnswers([]);
+      els.statusBadge.textContent = 'No operations selected';
+      return;
+    }
+    els.opError.hidden = true;
+    els.generateBtn.disabled = false;
+
+    var problems = buildProblems(ops, diff, count);
+    renderWorksheet(problems, layout, textSize);
+    renderAnswers(problems);
+
+    var diffLabel = diff.charAt(0).toUpperCase() + diff.slice(1);
+    var metaText = diffLabel + ' · ' + opsLabel(ops);
+    els.worksheetMeta.textContent = metaText;
+    els.answerMeta.textContent = metaText;
+    els.diffHint.textContent = DIFFICULTY_HINTS[diff];
+    els.statusBadge.textContent = count + ' problems ready';
+  }
+
+  function printInNewWindow(bodyClass){
+    // Artifacts can render inside a sandboxed frame where window.print() is silently
+    // blocked, so open the page's own markup in a fresh top-level window and print that.
+    var bodyClone = document.body.cloneNode(true);
+    var aks = bodyClone.querySelector('#answerKeySection');
+    if (aks) aks.removeAttribute('hidden');
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      window.print();
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+
+    var fired = false;
+    function go(){
+      if (fired) return;
+      fired = true;
+      printWin.focus();
+      printWin.print();
+    }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  function doPrint(mode){
+    printInNewWindow(mode === 'answers' ? 'print-answers' : '');
+  }
+
+  els.generateBtn.addEventListener('click', generate);
+  els.printWorksheetBtn.addEventListener('click', function(){ doPrint('worksheet'); });
+  els.printAnswersBtn.addEventListener('click', function(){ doPrint('answers'); });
+  els.toggleAnswersBtn.addEventListener('click', function(){
+    var hidden = els.answerKeySection.hasAttribute('hidden');
+    if (hidden){
+      els.answerKeySection.removeAttribute('hidden');
+      els.toggleAnswersBtn.textContent = 'Hide answer key on screen';
+    } else {
+      els.answerKeySection.setAttribute('hidden', '');
+      els.toggleAnswersBtn.textContent = 'Show answer key on screen';
+    }
+  });
+  els.opInputs.forEach(function(i){
+    i.addEventListener('change', function(){
+      if (currentOps().length){ els.opError.hidden = true; els.generateBtn.disabled = false; }
+    });
+  });
+
+  els.diffHint.textContent = DIFFICULTY_HINTS[currentDifficulty()];
+  generate();
+})();
+</script>

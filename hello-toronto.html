@@ -1,0 +1,493 @@
+<title>Hello, Toronto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6;
+    --bg-line: #D9E0E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F7FA;
+    --ink: #1B2733;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #93A0AC;
+    --border: #DCE3EB;
+    --accent: #C1443A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F7E1DE;
+    --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F;
+    --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ margin-bottom: 34px; }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(32px, 5vw, 46px); margin: 0 0 10px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 16px; max-width: 58ch; }
+
+  .section-block{ margin-top: 44px; }
+  .section-block h2{
+    font-family: "Fraunces", serif; font-weight: 600; font-size: 24px;
+    margin: 0 0 6px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-block > p.lead{ margin: 0 0 18px; color: var(--ink-soft); font-size: 15px; max-width: 60ch; }
+
+  .fact-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+  }
+  .fact-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.05), 0 6px 18px hsl(var(--shadow) / 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fact-card .fact-icon{
+    font-size: 40px;
+    line-height: 1;
+  }
+  .fact-card .fact-icon svg{ width: 40px; height: 62px; display: block; }
+  .fact-card h3{ font-size: 16.5px; font-weight: 700; margin: 4px 0 0; }
+  .fact-card p{ font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.55; }
+
+  /* ---------- Flag coloring widget ---------- */
+  .flag-widget{
+    display: flex;
+    max-width: 480px;
+    height: 160px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 3px solid var(--ink);
+    box-shadow: 0 6px 18px hsl(var(--shadow) / 0.10);
+  }
+  .flag-band{
+    flex: 1;
+    background: var(--surface-soft);
+    border: none;
+    cursor: pointer;
+    transition: background .15s ease;
+    padding: 0;
+  }
+  .flag-band:hover{ filter: brightness(0.97); }
+  .flag-band.is-red{ background: var(--accent); }
+  .flag-band:focus-visible{ outline: 3px solid var(--focus); outline-offset: -3px; }
+  .flag-leaf{
+    flex: 1.2;
+    background: var(--surface-soft);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    line-height: 1;
+    filter: grayscale(1) opacity(0.55);
+    transition: filter .15s ease;
+  }
+  .flag-leaf.is-colored{ filter: none; }
+  .flag-leaf:focus-visible{ outline: 3px solid var(--focus); outline-offset: -3px; }
+
+  .widget-actions{ display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 14px; border-radius: 10px;
+    padding: 11px 20px; border: 1.5px solid transparent; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  /* ---------- Leaf counting ---------- */
+  .leaf-row{ display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .leaf-btn{
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 28px;
+    cursor: pointer;
+    filter: grayscale(1) opacity(0.5);
+    transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+  }
+  .leaf-btn:hover{ transform: translateY(-2px); }
+  .leaf-btn.is-picked{ filter: none; border-color: var(--accent); transform: scale(1.06); }
+  .leaf-btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .leaf-counter{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .leaf-counter strong{ color: var(--accent); font-size: 19px; }
+
+  /* ---------- Spy checklist sheet ---------- */
+  .sheet-toolbar{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 44px 0 14px; flex-wrap: wrap;
+  }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 34px 38px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 22px;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .spy-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .spy-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .spy-box{
+    width: 26px; height: 26px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .spy-emoji{ font-size: 22px; }
+  .spy-label{ font-size: 14.5px; color: var(--ink); }
+
+  .draw-box{
+    margin-top: 28px;
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    min-height: 160px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  footer.page-footer{ margin-top: 44px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    body:not(.printing-spy) .spy-sheet-section{ display: none !important; }
+    body.printing-spy .explore-content{ display: none !important; }
+    body.printing-spy .app-header{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <p class="eyebrow">Life &amp; Extras</p>
+    <h1>Hello, Toronto! 🍁</h1>
+    <p>We're going on a trip to Canada! Let's learn a few fun things about Canada and Toronto before we go &mdash; then spot them for real once we're there.</p>
+  </header>
+
+  <div class="explore-content">
+    <div class="section-block">
+      <h2>Meet Canada</h2>
+      <div class="fact-grid">
+        <div class="fact-card">
+          <div class="fact-icon">🇨🇦</div>
+          <h3>The Flag</h3>
+          <p>Red and white, with a maple leaf right in the middle.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🦫</div>
+          <h3>The Beaver</h3>
+          <p>Canada's special animal! Beavers use their big teeth to build dams in rivers.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🍁</div>
+          <h3>The Maple Leaf</h3>
+          <p>Canada's favorite symbol. Sweet maple syrup comes from maple trees too!</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🏒</div>
+          <h3>Ice Hockey</h3>
+          <p>Canada's favorite sport &mdash; played on ice skates with a puck and a stick.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🪙</div>
+          <h3>The Loonie</h3>
+          <p>Canada's dollar coin has a picture of a bird called a loon on it.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">❄️</div>
+          <h3>Snowy Winters</h3>
+          <p>It gets cold and snowy &mdash; time for mittens, boots, and hot cocoa!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2>Toronto, Here We Come!</h2>
+      <div class="fact-grid">
+        <div class="fact-card">
+          <div class="fact-icon">
+            <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <polygon points="22,100 38,100 34,34 26,34" fill="var(--ink)"></polygon>
+              <ellipse cx="30" cy="31" rx="11" ry="7" fill="var(--ink)"></ellipse>
+              <polygon points="27,25 33,25 30,4" fill="var(--ink)"></polygon>
+              <line x1="30" y1="4" x2="30" y2="0" stroke="var(--ink)" stroke-width="2"></line>
+            </svg>
+          </div>
+          <h3>The CN Tower</h3>
+          <p>One of the tallest towers in the world! You can even see it from far away.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🌊</div>
+          <h3>Lake Ontario</h3>
+          <p>A lake so big it looks like the ocean, right next to the city.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🚋</div>
+          <h3>Streetcars</h3>
+          <p>Trains that drive right on the street, like a bus on rails.</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🏀</div>
+          <h3>Raptors &amp; Blue Jays</h3>
+          <p>Toronto's basketball and baseball teams &mdash; maybe we'll spot a jersey!</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🚇</div>
+          <h3>The Subway</h3>
+          <p>A train that zooms underground to get around the city fast.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block no-print">
+      <h2>Color the Flag!</h2>
+      <p class="lead">Click each part to color it in. Then press "Show the real flag" to see if you got it right.</p>
+      <div class="flag-widget" id="flagWidget">
+        <button class="flag-band" id="bandLeft" type="button" aria-label="Left stripe"></button>
+        <button class="flag-leaf" id="bandLeaf" type="button" aria-label="Maple leaf">🍁</button>
+        <button class="flag-band" id="bandRight" type="button" aria-label="Right stripe"></button>
+      </div>
+      <div class="widget-actions">
+        <button class="btn btn-primary" id="showFlagBtn" type="button">Show the real flag</button>
+        <button class="btn btn-ghost" id="clearFlagBtn" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="section-block no-print">
+      <h2>Count the Maple Leaves!</h2>
+      <p class="lead">Tap a leaf to pick it, then count how many you have.</p>
+      <div class="leaf-row" id="leafRow"></div>
+      <div class="leaf-counter">You've picked <strong id="leafCount">0</strong> leaves!</div>
+      <button class="btn btn-ghost" id="resetLeavesBtn" type="button">Reset</button>
+    </div>
+  </div>
+
+  <section class="spy-sheet-section">
+    <div class="sheet-toolbar no-print">
+      <h2>Printable: My Toronto Spy List</h2>
+      <button class="btn btn-primary" id="printSpyBtn" type="button">Print this checklist</button>
+    </div>
+    <div class="sheet spy-sheet">
+      <div class="sheet-head">
+        <div>
+          <h3>I Spy in Toronto! 🍁</h3>
+          <div class="meta">Check one off every time you spot it</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+      <div class="spy-grid">
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🗼</span><span class="spy-label">The CN Tower</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🚋</span><span class="spy-label">A streetcar</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🌊</span><span class="spy-label">Lake Ontario</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🇨🇦</span><span class="spy-label">A Canadian flag</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🐿️</span><span class="spy-label">A squirrel</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🦝</span><span class="spy-label">A raccoon</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🚇</span><span class="spy-label">The subway</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🍁</span><span class="spy-label">A maple leaf</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🍦</span><span class="spy-label">A yummy treat</span></div>
+        <div class="spy-item"><span class="spy-box"></span><span class="spy-emoji">🗣️</span><span class="spy-label">Someone say "eh?"</span></div>
+      </div>
+      <div class="draw-box">Draw your favorite thing you saw!</div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Made for our trip &mdash; come back and check things off as you spot them!</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var bandLeft = document.getElementById('bandLeft');
+  var bandRight = document.getElementById('bandRight');
+  var bandLeaf = document.getElementById('bandLeaf');
+  var showFlagBtn = document.getElementById('showFlagBtn');
+  var clearFlagBtn = document.getElementById('clearFlagBtn');
+
+  function toggleBand(el){ el.classList.toggle('is-red'); }
+  bandLeft.addEventListener('click', function(){ toggleBand(bandLeft); });
+  bandRight.addEventListener('click', function(){ toggleBand(bandRight); });
+  bandLeaf.addEventListener('click', function(){ bandLeaf.classList.toggle('is-colored'); });
+
+  showFlagBtn.addEventListener('click', function(){
+    bandLeft.classList.add('is-red');
+    bandRight.classList.add('is-red');
+    bandLeaf.classList.add('is-colored');
+  });
+  clearFlagBtn.addEventListener('click', function(){
+    bandLeft.classList.remove('is-red');
+    bandRight.classList.remove('is-red');
+    bandLeaf.classList.remove('is-colored');
+  });
+
+  var leafRow = document.getElementById('leafRow');
+  var leafCount = document.getElementById('leafCount');
+  var resetLeavesBtn = document.getElementById('resetLeavesBtn');
+
+  for (var i = 1; i <= 10; i++){
+    var b = document.createElement('button');
+    b.className = 'leaf-btn';
+    b.type = 'button';
+    b.textContent = '🍁';
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', 'Leaf ' + i);
+    b.addEventListener('click', function(){
+      this.classList.toggle('is-picked');
+      this.setAttribute('aria-pressed', this.classList.contains('is-picked') ? 'true' : 'false');
+      updateLeafCount();
+    });
+    leafRow.appendChild(b);
+  }
+
+  function updateLeafCount(){
+    var picked = leafRow.querySelectorAll('.leaf-btn.is-picked').length;
+    leafCount.textContent = picked;
+  }
+
+  resetLeavesBtn.addEventListener('click', function(){
+    Array.prototype.slice.call(leafRow.querySelectorAll('.leaf-btn')).forEach(function(b){
+      b.classList.remove('is-picked');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    updateLeafCount();
+  });
+
+  function printInNewWindow(bodyClass){
+    // Artifacts can render inside a sandboxed frame where window.print() is silently
+    // blocked, so open the page's own markup in a fresh top-level window and print that.
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+
+    var fired = false;
+    function go(){
+      if (fired) return;
+      fired = true;
+      printWin.focus();
+      printWin.print();
+    }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  document.getElementById('printSpyBtn').addEventListener('click', function(){
+    printInNewWindow('printing-spy');
+  });
+})();
+</script>

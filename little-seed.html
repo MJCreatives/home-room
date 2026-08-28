@@ -1,0 +1,450 @@
+<title>Little Seed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6;
+    --bg-line: #D9E0E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F7FA;
+    --ink: #1B2733;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #93A0AC;
+    --border: #DCE3EB;
+    --accent: #C1443A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F7E1DE;
+    --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F;
+    --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ margin-bottom: 34px; }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(32px, 5vw, 46px); margin: 0 0 10px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 16px; max-width: 58ch; }
+
+  .section-block{ margin-top: 44px; }
+  .section-block h2{
+    font-family: "Fraunces", serif; font-weight: 600; font-size: 24px;
+    margin: 0 0 6px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-block > p.lead{ margin: 0 0 18px; color: var(--ink-soft); font-size: 15px; max-width: 60ch; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 14px; border-radius: 10px;
+    padding: 11px 20px; border: 1.5px solid transparent; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-primary:disabled{ opacity: .45; cursor: not-allowed; }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  /* ---------- Storybook ---------- */
+  .story-actions{ display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .story-note{ font-size: 12.5px; color: var(--ink-faint); }
+  #storyPages{ display: flex; flex-direction: column; gap: 14px; }
+  .story-page{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.05), 0 6px 18px hsl(var(--shadow) / 0.06);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .story-page.is-reading{
+    border-color: var(--accent);
+    box-shadow: 0 2px 4px hsl(var(--shadow) / 0.08), 0 10px 26px hsl(var(--shadow) / 0.12);
+  }
+  .story-page .story-emoji{ font-size: 40px; line-height: 1; flex-shrink: 0; width: 52px; text-align: center; }
+  .story-page .story-body{ flex: 1; }
+  .story-page .story-num{
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; display: block;
+  }
+  .story-page .story-text{ font-size: 18px; color: var(--ink); line-height: 1.5; }
+
+  /* ---------- Coloring sheet ---------- */
+  .sheet-toolbar{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 44px 0 14px; flex-wrap: wrap;
+  }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 34px 38px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 22px;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .diagram-wrap{ width: 100%; max-width: 560px; margin: 0 auto; }
+  .diagram-wrap svg{ display: block; width: 100%; height: auto; }
+  .diagram-label{
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+
+  .cycle-title{
+    font-family: "Fraunces", serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 36px 0 16px;
+    text-align: center;
+  }
+  .cycle-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .cycle-step{ display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100px; }
+  .cycle-step svg{ width: 84px; height: 92px; }
+  .cycle-step span{ font-size: 12.5px; font-weight: 600; color: var(--ink-soft); text-align: center; }
+  .cycle-arrow{ font-size: 22px; color: var(--ink-faint); margin: 0 2px; align-self: center; padding-bottom: 22px; }
+
+  footer.page-footer{ margin-top: 44px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    body:not(.printing-color) .coloring-sheet-section{ display: none !important; }
+    body.printing-color .story-section{ display: none !important; }
+    body.printing-color .app-header{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <p class="eyebrow">Science</p>
+    <h1>Little Seed 🌱</h1>
+    <p>A short story about how a tiny seed grows into a flower, plus a coloring page showing all the parts of a plant.</p>
+  </header>
+
+  <section class="section-block story-section">
+    <h2>The Story: Little Seed's Big Day</h2>
+    <div class="story-actions no-print">
+      <button class="btn btn-primary" id="readBtn" type="button">🔊 Read the story aloud</button>
+      <button class="btn btn-ghost" id="stopBtn" type="button">Stop</button>
+      <span class="story-note" id="speechNote"></span>
+    </div>
+    <div id="storyPages"></div>
+  </section>
+
+  <section class="coloring-sheet-section">
+    <div class="sheet-toolbar no-print">
+      <h2>Printable: Parts of a Plant</h2>
+      <button class="btn btn-primary" id="printColorBtn" type="button">Print coloring page</button>
+    </div>
+    <div class="sheet">
+      <div class="sheet-head">
+        <div>
+          <h3>Parts of a Plant 🌼</h3>
+          <div class="meta">Color me in!</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a plant with roots, stem, leaves, and a flower">
+          <!-- roots -->
+          <path d="M240,210 C230,225 215,235 205,255" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M240,210 C242,230 240,245 240,262" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M240,210 C250,225 265,235 275,255" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M240,210 C228,222 220,228 213,238" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M240,210 C252,222 260,228 267,238" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"></path>
+
+          <!-- ground -->
+          <line x1="40" y1="210" x2="440" y2="210" stroke="var(--ink)" stroke-width="2"></line>
+
+          <!-- stem -->
+          <line x1="240" y1="210" x2="240" y2="70" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"></line>
+
+          <!-- leaves -->
+          <path d="M240,150 C210,120 175,125 165,140 C175,158 215,165 240,150 Z" fill="none" stroke="var(--ink)" stroke-width="2.5"></path>
+          <path d="M240,115 C270,85 305,90 315,105 C305,123 265,130 240,115 Z" fill="none" stroke="var(--ink)" stroke-width="2.5"></path>
+
+          <!-- flower -->
+          <g>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(0 240 55)"></ellipse>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(60 240 55)"></ellipse>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(120 240 55)"></ellipse>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(180 240 55)"></ellipse>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(240 240 55)"></ellipse>
+            <ellipse cx="240" cy="30" rx="9" ry="16" fill="none" stroke="var(--ink)" stroke-width="2" transform="rotate(300 240 55)"></ellipse>
+            <circle cx="240" cy="55" r="11" fill="none" stroke="var(--ink)" stroke-width="2"></circle>
+          </g>
+
+          <!-- label: Flower -->
+          <line x1="318" y1="46" x2="382" y2="34" stroke="var(--ink-faint)" stroke-width="1.5"></line>
+          <text x="386" y="38" class="diagram-label">Flower</text>
+
+          <!-- label: Leaves -->
+          <line x1="313" y1="106" x2="382" y2="118" stroke="var(--ink-faint)" stroke-width="1.5"></line>
+          <text x="386" y="122" class="diagram-label">Leaves</text>
+
+          <!-- label: Stem -->
+          <line x1="240" y1="170" x2="80" y2="170" stroke="var(--ink-faint)" stroke-width="1.5"></line>
+          <text x="42" y="174" class="diagram-label" text-anchor="start">Stem</text>
+
+          <!-- label: Roots -->
+          <line x1="240" y1="262" x2="240" y2="292" stroke="var(--ink-faint)" stroke-width="1.5"></line>
+          <text x="240" y="308" class="diagram-label" text-anchor="middle">Roots</text>
+        </svg>
+      </div>
+
+      <div class="cycle-title">How a Plant Grows</div>
+      <div class="cycle-row">
+        <div class="cycle-step">
+          <svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <ellipse cx="45" cy="55" rx="16" ry="22" fill="none" stroke="var(--ink)" stroke-width="2.5"></ellipse>
+            <path d="M33,55 C40,48 50,48 57,55" fill="none" stroke="var(--ink)" stroke-width="1.5"></path>
+          </svg>
+          <span>Seed</span>
+        </div>
+        <div class="cycle-arrow no-print">&rarr;</div>
+        <div class="cycle-step">
+          <svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line x1="8" y1="80" x2="82" y2="80" stroke="var(--ink)" stroke-width="2"></line>
+            <line x1="45" y1="80" x2="45" y2="55" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"></line>
+            <path d="M45,62 C36,55 30,57 28,63 C34,68 42,67 45,62 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+            <path d="M45,58 C54,51 60,53 62,59 C56,64 48,63 45,58 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+          </svg>
+          <span>Sprout</span>
+        </div>
+        <div class="cycle-arrow no-print">&rarr;</div>
+        <div class="cycle-step">
+          <svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line x1="8" y1="85" x2="82" y2="85" stroke="var(--ink)" stroke-width="2"></line>
+            <line x1="45" y1="85" x2="45" y2="28" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"></line>
+            <path d="M45,70 C33,60 25,63 22,71 C30,78 40,77 45,70 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+            <path d="M45,64 C57,54 65,57 68,65 C60,72 50,71 45,64 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+            <path d="M45,45 C35,37 28,40 26,47 C33,53 41,52 45,45 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+          </svg>
+          <span>Growing</span>
+        </div>
+        <div class="cycle-arrow no-print">&rarr;</div>
+        <div class="cycle-step">
+          <svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line x1="8" y1="85" x2="82" y2="85" stroke="var(--ink)" stroke-width="2"></line>
+            <line x1="45" y1="85" x2="45" y2="32" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"></line>
+            <path d="M45,70 C33,60 25,63 22,71 C30,78 40,77 45,70 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+            <path d="M45,64 C57,54 65,57 68,65 C60,72 50,71 45,64 Z" fill="none" stroke="var(--ink)" stroke-width="2"></path>
+            <g>
+              <ellipse cx="45" cy="12" rx="5" ry="9" fill="none" stroke="var(--ink)" stroke-width="1.5" transform="rotate(0 45 24)"></ellipse>
+              <ellipse cx="45" cy="12" rx="5" ry="9" fill="none" stroke="var(--ink)" stroke-width="1.5" transform="rotate(72 45 24)"></ellipse>
+              <ellipse cx="45" cy="12" rx="5" ry="9" fill="none" stroke="var(--ink)" stroke-width="1.5" transform="rotate(144 45 24)"></ellipse>
+              <ellipse cx="45" cy="12" rx="5" ry="9" fill="none" stroke="var(--ink)" stroke-width="1.5" transform="rotate(216 45 24)"></ellipse>
+              <ellipse cx="45" cy="12" rx="5" ry="9" fill="none" stroke="var(--ink)" stroke-width="1.5" transform="rotate(288 45 24)"></ellipse>
+              <circle cx="45" cy="24" r="6" fill="none" stroke="var(--ink)" stroke-width="1.5"></circle>
+            </g>
+          </svg>
+          <span>Blooming</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Grab some crayons and color Little Seed's whole life story!</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORY = [
+    { emoji: '🌰', text: "Once there was a tiny seed, tucked in the warm brown dirt." },
+    { emoji: '🌧️', text: "Rain fell — pitter, patter! The little seed drank it up." },
+    { emoji: '☀️', text: "The sun peeked out and warmed the ground. The seed felt cozy." },
+    { emoji: '🌱', text: "Down below, tiny roots grew, reaching deep like little fingers." },
+    { emoji: '🌱', text: "Up above, a green sprout popped through the dirt. Hello, sprout!" },
+    { emoji: '🌿', text: "The stem grew tall, and the leaves opened wide to catch the sun." },
+    { emoji: '🌻', text: "Day by day, the little plant grew bigger and bigger." },
+    { emoji: '🌸', text: "One morning, a tiny bud appeared at the very top." },
+    { emoji: '🌼', text: "Slowly, slowly, the bud opened... into a beautiful flower!" },
+    { emoji: '🌻', text: "And inside that flower? New seeds, ready for their own big adventure." }
+  ];
+
+  var storyPagesEl = document.getElementById('storyPages');
+  var readBtn = document.getElementById('readBtn');
+  var stopBtn = document.getElementById('stopBtn');
+  var speechNote = document.getElementById('speechNote');
+
+  STORY.forEach(function(page, idx){
+    var el = document.createElement('div');
+    el.className = 'story-page';
+    el.id = 'page-' + idx;
+    el.innerHTML =
+      '<div class="story-emoji">' + page.emoji + '</div>' +
+      '<div class="story-body"><span class="story-num">Page ' + (idx + 1) + ' of ' + STORY.length + '</span>' +
+      '<div class="story-text">' + page.text + '</div></div>';
+    storyPagesEl.appendChild(el);
+  });
+
+  var supportsSpeech = 'speechSynthesis' in window;
+  if (!supportsSpeech){
+    readBtn.disabled = true;
+    stopBtn.style.display = 'none';
+    speechNote.textContent = "Read-aloud isn't available in this browser — read it together instead!";
+  }
+
+  var reading = false;
+
+  function clearHighlights(){
+    Array.prototype.slice.call(document.querySelectorAll('.story-page.is-reading')).forEach(function(el){
+      el.classList.remove('is-reading');
+    });
+  }
+
+  function speakPage(idx){
+    if (idx >= STORY.length || !reading){
+      reading = false;
+      clearHighlights();
+      return;
+    }
+    clearHighlights();
+    var pageEl = document.getElementById('page-' + idx);
+    pageEl.classList.add('is-reading');
+    pageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    var utter = new SpeechSynthesisUtterance(STORY[idx].text);
+    utter.rate = 0.9;
+    utter.pitch = 1.05;
+    utter.onend = function(){ speakPage(idx + 1); };
+    utter.onerror = function(){ reading = false; clearHighlights(); };
+    window.speechSynthesis.speak(utter);
+  }
+
+  readBtn.addEventListener('click', function(){
+    if (!supportsSpeech) return;
+    window.speechSynthesis.cancel();
+    reading = true;
+    speakPage(0);
+  });
+
+  stopBtn.addEventListener('click', function(){
+    reading = false;
+    if (supportsSpeech) window.speechSynthesis.cancel();
+    clearHighlights();
+  });
+
+  function printInNewWindow(bodyClass){
+    // Artifacts can render inside a sandboxed frame where window.print() is silently
+    // blocked, so open the page's own markup in a fresh top-level window and print that.
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+
+    var fired = false;
+    function go(){
+      if (fired) return;
+      fired = true;
+      printWin.focus();
+      printWin.print();
+    }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  document.getElementById('printColorBtn').addEventListener('click', function(){
+    printInNewWindow('printing-color');
+  });
+})();
+</script>
