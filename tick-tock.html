@@ -1,0 +1,545 @@
+<title>Tick Tock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+    --good: #2E7D5B; --good-soft: #E3F3EB; --good-border: #B9E0CA;
+    --bad: #C1443A; --bad-soft: #F7E1DE; --bad-border: #EBC0BA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+      --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+      --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+    --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+    --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 52ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .diff-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+  select.count-select:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Sheet ---------- */
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 26px; gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .clock-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
+  .clock-card{
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    border: 1.5px solid var(--border); border-radius: 14px; padding: 18px 14px 20px;
+    background: var(--surface-soft); break-inside: avoid;
+  }
+  .clock-card .num{
+    align-self: flex-start; font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    color: var(--ink-faint); font-weight: 600;
+  }
+  .clock-card.is-correct{ border-color: var(--good-border); background: var(--good-soft); }
+  .clock-card.is-incorrect{ border-color: var(--bad-border); background: var(--bad-soft); }
+
+  .clock-face-svg{ width: 130px; height: 130px; }
+  .clock-face-svg .face{ fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
+  .clock-face-svg .tick{ stroke: var(--ink-soft); stroke-width: 1.5; }
+  .clock-face-svg .tick.major{ stroke: var(--ink); stroke-width: 2.5; }
+  .clock-face-svg .numeral{ font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 600; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; }
+  .clock-face-svg .hand-hour{ stroke: var(--ink); stroke-width: 6; stroke-linecap: round; }
+  .clock-face-svg .hand-minute{ stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+  .clock-face-svg .hub{ fill: var(--ink); }
+
+  /* Digit answer boxes */
+  .digit-answer{ display: flex; align-items: center; gap: 6px; }
+  .digit-answer .digit-input{
+    width: 42px; height: 42px; text-align: center; font-family: "IBM Plex Mono", monospace;
+    font-size: 18px; font-weight: 700; color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 0;
+  }
+  .digit-answer .digit-input:focus-visible{ outline: 2px solid var(--focus); outline-offset: 1px; }
+  .digit-answer .colon{ font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 700; color: var(--ink-soft); }
+
+  .word-answer .word-input{
+    width: 100%; font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 11px; text-align: center;
+  }
+  .word-answer .word-input:focus-visible{ outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  /* Print-only static answer areas (built with the final markup already) */
+  .print-only{ display: none; }
+  .blank-boxes{ display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .blank-box{ width: 34px; height: 34px; border: 1.5px solid var(--ink-faint); border-radius: 6px; }
+  .blank-colon{ font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 700; color: var(--ink-soft); }
+  .blank-line{ width: 100%; height: 1.5px; background: var(--ink-faint); margin-top: 10px; }
+  .key-value{ display: none; }
+
+  .score-line{
+    margin-top: 6px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .clock-card{ background: #fff !important; border-color: var(--border) !important; }
+
+    .print-only{ display: block; }
+    .digit-answer, .word-answer{ display: none !important; }
+
+    body.printing-answers .blank-boxes{ display: none !important; }
+    body.printing-answers .blank-line{ display: none !important; }
+    body.printing-answers .key-value{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 17px; color: var(--good); text-align: center; }
+    body:not(.printing-answers) .key-value{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Math</p>
+      <h1>Tick Tock 🕐</h1>
+      <p>Random analog clocks to read &mdash; write the digital time, or say it in words like "half past 3" or "quarter to 1."</p>
+    </div>
+    <span class="badge" id="statusBadge">Write the digits</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Tick Tock settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Exercise type</span>
+      <div class="seg" role="radiogroup" aria-label="Exercise type">
+        <input type="radio" name="mode" id="mode-digits" value="digits" checked>
+        <label for="mode-digits">Write the digits</label>
+        <input type="radio" name="mode" id="mode-words" value="words">
+        <label for="mode-words">Say it in words</label>
+      </div>
+    </div>
+
+    <div class="field-group" id="granularityGroup">
+      <span class="field-label">Generate by</span>
+      <div class="seg" role="radiogroup" aria-label="Granularity">
+        <input type="radio" name="granularity" id="gran-5" value="5" checked>
+        <label for="gran-5">5-minute marks</label>
+        <input type="radio" name="granularity" id="gran-1" value="1">
+        <label for="gran-1">Any minute</label>
+      </div>
+      <p class="diff-hint" id="granularityHint"></p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">How many clocks</span>
+      <select class="count-select" id="countSelect">
+        <option value="4">4 clocks</option>
+        <option value="6" selected>6 clocks</option>
+        <option value="8">8 clocks</option>
+        <option value="12">12 clocks</option>
+      </select>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New Clocks</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="checkBtn" type="button">Check my answers</button>
+        <button class="btn btn-ghost" id="printWorksheetBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="clock-section">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Tick Tock</h3>
+          <div class="meta" id="sheetMeta">Write the digits &middot; 5-minute marks</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+
+      <div class="clock-grid" id="clockGrid"></div>
+
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Each set of clocks is generated fresh &mdash; hit "New Clocks" any time for more practice.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var HOUR_WORDS = ["twelve","one","two","three","four","five","six","seven","eight","nine","ten","eleven"];
+
+  function hourWord(h){ return HOUR_WORDS[h % 12]; }
+  function nextHour(h){ return (h % 12) + 1; }
+  function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+
+  var WORD_TEMPLATES = {
+    0:  function(h){ return { word: hourWord(h) + " o'clock", digit: h + " o'clock" }; },
+    5:  function(h){ return { word: "five minutes past " + hourWord(h), digit: "five minutes past " + h }; },
+    10: function(h){ return { word: "ten minutes past " + hourWord(h), digit: "ten minutes past " + h }; },
+    15: function(h){ return { word: "quarter past " + hourWord(h), digit: "quarter past " + h }; },
+    20: function(h){ return { word: "twenty minutes past " + hourWord(h), digit: "twenty minutes past " + h }; },
+    25: function(h){ return { word: "twenty-five minutes past " + hourWord(h), digit: "twenty-five minutes past " + h }; },
+    30: function(h){ return { word: "half past " + hourWord(h), digit: "half past " + h }; },
+    35: function(h){ var n = nextHour(h); return { word: "twenty-five minutes to " + hourWord(n), digit: "twenty-five minutes to " + n }; },
+    40: function(h){ var n = nextHour(h); return { word: "twenty minutes to " + hourWord(n), digit: "twenty minutes to " + n }; },
+    45: function(h){ var n = nextHour(h); return { word: "quarter to " + hourWord(n), digit: "quarter to " + n }; },
+    50: function(h){ var n = nextHour(h); return { word: "ten minutes to " + hourWord(n), digit: "ten minutes to " + n }; },
+    55: function(h){ var n = nextHour(h); return { word: "five minutes to " + hourWord(n), digit: "five minutes to " + n }; }
+  };
+
+  function normalize(s){ return s.toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+  var GRAN_HINT = {
+    "5": "Minute hand lands on the 5-minute marks &mdash; good for beginners.",
+    "1": "Minute hand can land on any minute, 0&ndash;59 &mdash; more challenging."
+  };
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    granInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="granularity"]')),
+    granularityGroup: document.getElementById('granularityGroup'),
+    granularityHint: document.getElementById('granularityHint'),
+    countSelect: document.getElementById('countSelect'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printWorksheetBtn: document.getElementById('printWorksheetBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetMeta: document.getElementById('sheetMeta'),
+    clockGrid: document.getElementById('clockGrid'),
+    scoreLine: document.getElementById('scoreLine')
+  };
+
+  var clocks = []; // { hour, minute, wordAnswers: [...] }
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'digits';
+  }
+  function currentGranularity(){
+    var checked = els.granInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : '5';
+  }
+
+  function polar(cx, cy, r, angleDeg){
+    var rad = (angleDeg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+
+  function clockSvg(hour, minute){
+    var cx = 100, cy = 100, faceR = 92;
+    var parts = [];
+    parts.push('<circle class="face" cx="' + cx + '" cy="' + cy + '" r="' + faceR + '"></circle>');
+
+    for (var m = 0; m < 60; m += 5){
+      var angle = m * 6;
+      var major = (m % 15 === 0);
+      var outer = polar(cx, cy, faceR - 4, angle);
+      var inner = polar(cx, cy, faceR - (major ? 16 : 10), angle);
+      parts.push('<line class="tick' + (major ? ' major' : '') + '" x1="' + outer.x.toFixed(1) + '" y1="' + outer.y.toFixed(1) + '" x2="' + inner.x.toFixed(1) + '" y2="' + inner.y.toFixed(1) + '"></line>');
+    }
+
+    for (var n = 1; n <= 12; n++){
+      var na = n * 30;
+      var pos = polar(cx, cy, faceR - 28, na);
+      parts.push('<text class="numeral" x="' + pos.x.toFixed(1) + '" y="' + pos.y.toFixed(1) + '">' + n + '</text>');
+    }
+
+    var hourAngle = (hour % 12 + minute / 60) * 30;
+    var minuteAngle = minute * 6;
+    var hourEnd = polar(cx, cy, 46, hourAngle);
+    var minuteEnd = polar(cx, cy, 70, minuteAngle);
+
+    parts.push('<line class="hand-hour" x1="' + cx + '" y1="' + cy + '" x2="' + hourEnd.x.toFixed(1) + '" y2="' + hourEnd.y.toFixed(1) + '"></line>');
+    parts.push('<line class="hand-minute" x1="' + cx + '" y1="' + cy + '" x2="' + minuteEnd.x.toFixed(1) + '" y2="' + minuteEnd.y.toFixed(1) + '"></line>');
+    parts.push('<circle class="hub" cx="' + cx + '" cy="' + cy + '" r="5"></circle>');
+
+    return '<svg class="clock-face-svg" viewBox="0 0 200 200" aria-hidden="true">' + parts.join('') + '</svg>';
+  }
+
+  function randomClock(granularity){
+    var hour = 1 + Math.floor(Math.random() * 12);
+    var minute;
+    if (granularity === '5'){
+      minute = Math.floor(Math.random() * 12) * 5;
+    } else {
+      minute = Math.floor(Math.random() * 60);
+    }
+    return { hour: hour, minute: minute };
+  }
+
+  function nearestFive(m){ return Math.round(m / 5) * 5 % 60; }
+
+  function generate(){
+    var mode = currentMode();
+    var granularity = mode === 'words' ? '5' : currentGranularity();
+    var count = parseInt(els.countSelect.value, 10);
+    clocks = [];
+    for (var i = 0; i < count; i++){
+      clocks.push(randomClock(granularity));
+    }
+    render(mode, granularity);
+  }
+
+  function render(mode, granularity){
+    els.statusBadge.textContent = mode === 'digits' ? 'Write the digits' : 'Say it in words';
+    els.granularityGroup.style.display = mode === 'words' ? 'none' : '';
+    els.granularityHint.innerHTML = GRAN_HINT[granularity];
+    els.sheetMeta.textContent = (mode === 'digits' ? 'Write the digits' : 'Say it in words') + ' · ' + (mode === 'words' ? '5-minute marks' : (granularity === '5' ? '5-minute marks' : 'any minute'));
+
+    els.clockGrid.innerHTML = '';
+    clocks.forEach(function(c, idx){
+      var card = document.createElement('div');
+      card.className = 'clock-card';
+      card.dataset.index = idx;
+
+      var svg = clockSvg(c.hour, c.minute);
+
+      var answerHtml = '';
+      var printHtml = '';
+
+      if (mode === 'digits'){
+        var hhVal = c.hour;
+        var mmVal = pad2(c.minute);
+        answerHtml =
+          '<div class="digit-answer">' +
+            '<input type="text" inputmode="numeric" maxlength="2" class="digit-input hh" aria-label="Hour" placeholder="H">' +
+            '<span class="colon">:</span>' +
+            '<input type="text" inputmode="numeric" maxlength="2" class="digit-input mm" aria-label="Minutes" placeholder="MM">' +
+          '</div>';
+        printHtml =
+          '<div class="print-only">' +
+            '<div class="blank-boxes"><span class="blank-box"></span><span class="blank-colon">:</span><span class="blank-box"></span></div>' +
+            '<div class="key-value">' + hhVal + ':' + mmVal + '</div>' +
+          '</div>';
+      } else {
+        var phrases = WORD_TEMPLATES[c.minute](c.hour);
+        answerHtml =
+          '<div class="word-answer">' +
+            '<input type="text" class="word-input" aria-label="Time in words" placeholder="e.g. half past 3">' +
+          '</div>';
+        printHtml =
+          '<div class="print-only">' +
+            '<div class="blank-line"></div>' +
+            '<div class="key-value">' + phrases.word + '</div>' +
+          '</div>';
+      }
+
+      card.innerHTML =
+        '<span class="num">#' + (idx + 1) + '</span>' +
+        svg +
+        answerHtml +
+        printHtml;
+
+      els.clockGrid.appendChild(card);
+    });
+
+    els.scoreLine.hidden = true;
+    Array.prototype.slice.call(els.clockGrid.querySelectorAll('.clock-card')).forEach(function(card){
+      card.classList.remove('is-correct', 'is-incorrect');
+    });
+
+    Array.prototype.slice.call(els.clockGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('input', function(){
+        var card = inp.closest('.clock-card');
+        card.classList.remove('is-correct', 'is-incorrect');
+        els.scoreLine.hidden = true;
+      });
+    });
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var mode = currentMode();
+    var cards = Array.prototype.slice.call(els.clockGrid.querySelectorAll('.clock-card'));
+    var correctCount = 0;
+
+    cards.forEach(function(card, idx){
+      var c = clocks[idx];
+      var ok = false;
+      if (mode === 'digits'){
+        var hh = card.querySelector('.hh').value.trim();
+        var mm = card.querySelector('.mm').value.trim();
+        ok = hh !== '' && mm !== '' && parseInt(hh, 10) === c.hour && parseInt(mm, 10) === c.minute;
+      } else {
+        var val = normalize(card.querySelector('.word-input').value || '');
+        var phrases = WORD_TEMPLATES[c.minute](c.hour);
+        ok = val !== '' && (val === normalize(phrases.word) || val === normalize(phrases.digit));
+      }
+      card.classList.remove('is-correct', 'is-incorrect');
+      card.classList.add(ok ? 'is-correct' : 'is-incorrect');
+      if (ok) correctCount++;
+    });
+
+    var total = cards.length;
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correctCount === total
+      ? correctCount + ' out of ' + total + ' correct — great job telling time! 🎉'
+      : correctCount + ' out of ' + total + ' correct — keep practicing!';
+  });
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', generate); });
+  els.granInputs.forEach(function(i){ i.addEventListener('change', generate); });
+  els.countSelect.addEventListener('change', generate);
+  els.newBtn.addEventListener('click', generate);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printWorksheetBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  generate();
+})();
+</script>

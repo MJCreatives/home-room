@@ -1,0 +1,391 @@
+<title>Home Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6;
+    --bg-line: #D9E0E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F5F7FA;
+    --ink: #1B2733;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #93A0AC;
+    --border: #DCE3EB;
+    --accent: #C1443A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F7E1DE;
+    --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F;
+    --shadow: 220 30% 20%;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23;
+      --bg-line: #202B36;
+      --surface: #1C2530;
+      --surface-soft: #212B37;
+      --ink: #E8EDF2;
+      --ink-soft: #9AAAB8;
+      --ink-faint: #64717E;
+      --border: #2B3644;
+      --accent: #E2685C;
+      --accent-ink: #1B0F0D;
+      --accent-soft: #3A2422;
+      --accent-soft-border: #55302C;
+      --focus: #6FB4D8;
+      --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23;
+    --bg-line: #202B36;
+    --surface: #1C2530;
+    --surface-soft: #212B37;
+    --ink: #E8EDF2;
+    --ink-soft: #9AAAB8;
+    --ink-faint: #64717E;
+    --border: #2B3644;
+    --accent: #E2685C;
+    --accent-ink: #1B0F0D;
+    --accent-soft: #3A2422;
+    --accent-soft-border: #55302C;
+    --focus: #6FB4D8;
+    --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 90px;
+  }
+
+  /* ---------- Header ---------- */
+  .hero{
+    margin-bottom: 40px;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .hero h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(32px, 5vw, 48px);
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .hero p{
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 56ch;
+  }
+
+  /* ---------- Subject sections ---------- */
+  .subject{
+    margin-top: 40px;
+  }
+  .subject-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .subject-head h2{
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subject-head h2 .icon{
+    font-size: 20px;
+    line-height: 1;
+  }
+  .subject-count{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .tool-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .tool-card{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.05), 0 6px 18px hsl(var(--shadow) / 0.06);
+    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+  }
+  .tool-card:hover{
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 4px 10px hsl(var(--shadow) / 0.08), 0 14px 30px hsl(var(--shadow) / 0.10);
+  }
+  .tool-card:focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .tool-card .top-row{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tool-card .tool-icon{
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tool-card .go{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+  .tool-card:hover .go{ color: var(--accent); }
+  .tool-card h3{
+    font-size: 16.5px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .tool-card .desc{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .tool-card .tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .tag{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 9px;
+  }
+
+  .empty-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    color: var(--ink-faint);
+    min-height: 128px;
+  }
+  .empty-card .empty-title{
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+  .empty-card .empty-hint{
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  footer{
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">Homeschool tool shelf</p>
+    <h1>Home Room</h1>
+    <p>Every learning tool built for your homeschool days, kept in one place and sorted by subject. Ask for a new one anytime &mdash; it gets a spot on the shelf.</p>
+  </div>
+
+  <section class="subject">
+    <div class="subject-head">
+      <h2><span class="icon">🔢</span> Math</h2>
+      <span class="subject-count">2 tools</span>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="sum-and-solve.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">🧮</div>
+        </div>
+        <h3>Sum &amp; Solve</h3>
+        <p class="desc">Random addition, subtraction, multiplication &amp; division worksheets with a matching printable answer key.</p>
+        <div class="tags">
+          <span class="tag">3 difficulties</span>
+          <span class="tag">Horizontal / vertical</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+      <a class="tool-card" href="tick-tock.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">🕐</div>
+        </div>
+        <h3>Tick Tock</h3>
+        <p class="desc">Random analog clocks for time-telling practice &mdash; write the digital time, or say it in words like "half past 3."</p>
+        <div class="tags">
+          <span class="tag">5-min / any minute</span>
+          <span class="tag">Digits or words</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="subject">
+    <div class="subject-head">
+      <h2><span class="icon">📖</span> Reading &amp; Writing</h2>
+      <span class="subject-count">3 tools</span>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="first-strokes.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">✏️</div>
+        </div>
+        <h3>First Strokes</h3>
+        <p class="desc">Letter-writing practice sheets with numbered stroke-order arrows, faded traceable letters, and blank practice lines.</p>
+        <div class="tags">
+          <span class="tag">Upper / lower</span>
+          <span class="tag">Any letters</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+      <a class="tool-card" href="word-wall.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">🗂️</div>
+        </div>
+        <h3>Word Wall</h3>
+        <p class="desc">Sight-word flashcard generator (Dolch lists) with a printable flashcard sheet and a running practice log.</p>
+        <div class="tags">
+          <span class="tag">5 levels</span>
+          <span class="tag">Practice log</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+      <a class="tool-card" href="story-time.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">📚</div>
+        </div>
+        <h3>Story Time</h3>
+        <p class="desc">A randomly generated short story with comprehension questions, across three reading levels &mdash; printable as a worksheet or answer key.</p>
+        <div class="tags">
+          <span class="tag">3 levels</span>
+          <span class="tag">Random stories</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="subject">
+    <div class="subject-head">
+      <h2><span class="icon">🔬</span> Science</h2>
+      <span class="subject-count">1 tool</span>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="little-seed.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">🌱</div>
+        </div>
+        <h3>Little Seed</h3>
+        <p class="desc">A read-aloud story about how a seed grows into a flower, plus a printable coloring page of a plant's parts and life cycle.</p>
+        <div class="tags">
+          <span class="tag">Read-aloud</span>
+          <span class="tag">Printable</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="subject">
+    <div class="subject-head">
+      <h2><span class="icon">🎨</span> Life &amp; Extras</h2>
+      <span class="subject-count">1 tool</span>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="hello-toronto.html" target="_blank" rel="noopener">
+        <div class="top-row">
+          <div class="tool-icon">🍁</div>
+        </div>
+        <h3>Hello, Toronto</h3>
+        <p class="desc">A playful Canada &amp; Toronto explorer &mdash; fact cards, a color-the-flag game, leaf counting, and a printable trip spy checklist.</p>
+        <div class="tags">
+          <span class="tag">Interactive</span>
+          <span class="tag">Printable checklist</span>
+        </div>
+        <div class="go">Open tool &rarr;</div>
+      </a>
+    </div>
+  </section>
+
+  <footer>Maintained by Claude &mdash; each new tool you ask for gets added to this page.</footer>
+</div>

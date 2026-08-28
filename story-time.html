@@ -1,0 +1,543 @@
+<title>Story Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+    --good: #2E7D5B; --good-soft: #E3F3EB; --good-border: #B9E0CA;
+    --bad: #C1443A; --bad-soft: #F7E1DE; --bad-border: #EBC0BA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+      --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+      --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+    --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+    --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 900px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 52ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .diff-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Sheet ---------- */
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 22px; gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .story-title{ font-family: "Fraunces", serif; font-size: 24px; font-weight: 600; margin: 0 0 14px; }
+  .story-text{
+    font-size: 16.5px; line-height: 1.85; color: var(--ink); margin: 0 0 30px;
+    padding: 20px 22px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 12px;
+  }
+
+  .questions{ display: flex; flex-direction: column; gap: 22px; }
+  .question .q-text{ font-size: 15.5px; font-weight: 600; margin: 0 0 10px; }
+  .options{ display: flex; flex-direction: column; gap: 8px; }
+  .option-row{ position: relative; }
+  .option-row input{ position: absolute; opacity: 0; pointer-events: none; }
+  .option-row label{
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    cursor: pointer; font-size: 14.5px; color: var(--ink); transition: border-color .12s ease, background .12s ease;
+  }
+  .option-row .letter{
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink-faint);
+    display: flex; align-items: center; justify-content: center; font-family: "IBM Plex Mono", monospace;
+    font-weight: 700; font-size: 12.5px; color: var(--ink-soft);
+  }
+  .option-row input:checked + label{ border-color: var(--focus); background: var(--surface); }
+  .option-row input:checked + label .letter{ border-color: var(--focus); color: var(--focus); }
+  .option-row input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .option-row.is-correct label{ border-color: var(--good-border); background: var(--good-soft); }
+  .option-row.is-correct label .letter{ border-color: var(--good); background: var(--good); color: #fff; }
+  .option-row.is-incorrect label{ border-color: var(--bad-border); background: var(--bad-soft); }
+  .option-row.is-incorrect label .letter{ border-color: var(--bad); background: var(--bad); color: #fff; }
+
+  .score-line{
+    margin-top: 22px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+
+    /* Worksheet print: always show blank, unselected options regardless of on-screen state */
+    body:not(.printing-answers) .option-row label{ border-color: var(--border) !important; background: #fff !important; }
+    body:not(.printing-answers) .option-row .letter{ border-color: var(--ink-faint) !important; background: #fff !important; color: var(--ink-soft) !important; }
+
+    /* Answer key print: mark the correct option, ignore selection state */
+    body.printing-answers .option-row:not(.is-answer) label{ border-color: var(--border) !important; background: #fff !important; }
+    body.printing-answers .option-row:not(.is-answer) .letter{ border-color: var(--ink-faint) !important; background: #fff !important; color: var(--ink-soft) !important; }
+    body.printing-answers .option-row.is-answer label{ border-color: var(--good-border) !important; background: var(--good-soft) !important; }
+    body.printing-answers .option-row.is-answer .letter{ border-color: var(--good) !important; background: var(--good) !important; color: #fff !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Reading &amp; Writing</p>
+      <h1>Story Time 📚</h1>
+      <p>Pick a reading level, generate a short story, and answer the comprehension questions &mdash; on screen or on paper.</p>
+    </div>
+    <span class="badge" id="statusBadge">Level 1</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Story Time settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Reading level</span>
+      <div class="seg" role="radiogroup" aria-label="Level">
+        <input type="radio" name="level" id="lvl-1" value="Level 1" checked>
+        <label for="lvl-1">Level 1</label>
+        <input type="radio" name="level" id="lvl-2" value="Level 2">
+        <label for="lvl-2">Level 2</label>
+        <input type="radio" name="level" id="lvl-3" value="Level 3">
+        <label for="lvl-3">Level 3</label>
+      </div>
+      <p class="diff-hint" id="levelHint"></p>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newStoryBtn" type="button">🎲 New Story</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="checkBtn" type="button">Check my answers</button>
+        <button class="btn btn-ghost" id="printWorksheetBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="story-section">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Story Time</h3>
+          <div class="meta" id="sheetMeta">Level 1</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+
+      <h4 class="story-title" id="storyTitle"></h4>
+      <p class="story-text" id="storyText"></p>
+
+      <div class="questions" id="questions"></div>
+
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Each level pulls a random story from its own pool, so kids can practice with fresh questions any time.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORIES = {
+    "Level 1": [
+      {
+        title: "The Red Ball",
+        text: "Sam has a red ball. Sam and his dog run and play. The ball goes up, up, up! Sam and his dog laugh and laugh.",
+        questions: [
+          { q: "What color is the ball?", options: ["Red", "Blue", "Green"], correct: 0 },
+          { q: "Who plays with Sam?", options: ["His cat", "His dog", "His friend"], correct: 1 },
+          { q: "What happens to the ball?", options: ["It pops", "It rolls away", "It goes up"], correct: 2 }
+        ]
+      },
+      {
+        title: "A Big Hug",
+        text: "Mia sees her mom at the door. Mia runs fast. Mia gives her mom a big hug. Mom hugs Mia back. They are happy.",
+        questions: [
+          { q: "Who does Mia see?", options: ["Her dad", "Her mom", "Her friend"], correct: 1 },
+          { q: "What does Mia do?", options: ["Runs and hugs", "Sits down", "Reads a book"], correct: 0 },
+          { q: "How do Mia and Mom feel?", options: ["Sad", "Sleepy", "Happy"], correct: 2 }
+        ]
+      },
+      {
+        title: "Yellow Sun",
+        text: "The sun is yellow and warm. Birds sing in the tree. A cat sleeps in the sun. It is a good day to play outside.",
+        questions: [
+          { q: "What color is the sun?", options: ["Yellow", "Purple", "Black"], correct: 0 },
+          { q: "Where does the cat sleep?", options: ["In the tree", "In the sun", "In the house"], correct: 1 },
+          { q: "Who sings in the tree?", options: ["Birds", "Frogs", "Dogs"], correct: 0 }
+        ]
+      },
+      {
+        title: "The Little Boat",
+        text: "Ben has a little boat. He puts it in the water. The boat goes fast. Ben claps his hands. The boat comes back to Ben.",
+        questions: [
+          { q: "What does Ben have?", options: ["A little boat", "A big kite", "A red bike"], correct: 0 },
+          { q: "Where does Ben put the boat?", options: ["In a box", "In the water", "On the table"], correct: 1 },
+          { q: "What does Ben do when the boat goes fast?", options: ["He cries", "He claps", "He sleeps"], correct: 1 }
+        ]
+      }
+    ],
+    "Level 2": [
+      {
+        title: "The Missing Sock",
+        text: "Every morning, Lily looked for her favorite blue sock. One day, it was gone! She looked under her bed and behind the door. She even looked in the kitchen. Finally, she found it curled up inside her backpack. Lily laughed and put both socks on.",
+        questions: [
+          { q: "What was Lily looking for?", options: ["A blue sock", "A red hat", "A toy"], correct: 0 },
+          { q: "Where did Lily finally find the sock?", options: ["Under her bed", "In the kitchen", "In her backpack"], correct: 2 },
+          { q: "How do you think Lily felt when she found the sock?", options: ["Angry", "Happy", "Scared"], correct: 1 }
+        ]
+      },
+      {
+        title: "The New Kid",
+        text: "Marcus was nervous on his first day at a new school. He didn't know anyone. At lunch, a boy named Theo waved and said, 'Sit with us!' Marcus smiled and sat down. By the end of the day, Marcus had two new friends and felt much better about his new school.",
+        questions: [
+          { q: "Why was Marcus nervous?", options: ["He forgot his lunch", "It was his first day", "He was tired"], correct: 1 },
+          { q: "Who invited Marcus to sit down?", options: ["A teacher", "Theo", "His mom"], correct: 1 },
+          { q: "How did Marcus feel by the end of the day?", options: ["Worse", "The same", "Better"], correct: 2 }
+        ]
+      },
+      {
+        title: "Rain on the Window",
+        text: "Ava wanted to play outside, but rain tapped on the window all afternoon. She frowned and watched the drops race down the glass. Then her dad brought out a puzzle and some markers. Soon Ava was laughing and drawing pictures of rainy days. She almost forgot she couldn't go outside.",
+        questions: [
+          { q: "Why couldn't Ava play outside?", options: ["It was too dark", "It was raining", "She was sick"], correct: 1 },
+          { q: "What did Ava's dad bring out?", options: ["A puzzle and markers", "A soccer ball", "A book about dogs"], correct: 0 },
+          { q: "What can you tell about how Ava felt at the end?", options: ["Still upset", "Bored", "Happier"], correct: 2 }
+        ]
+      },
+      {
+        title: "The Tallest Tower",
+        text: "At recess, Priya and Sam built a tower out of blocks. It kept falling down. They tried again, this time putting the biggest blocks on the bottom. The tower grew taller and taller. When the bell rang, their tower was the tallest one in the whole classroom!",
+        questions: [
+          { q: "What were Priya and Sam building?", options: ["A tower", "A fort", "A boat"], correct: 0 },
+          { q: "What did they change to make the tower work?", options: ["Used smaller blocks", "Put big blocks on the bottom", "Asked a teacher for help"], correct: 1 },
+          { q: "How did the tower turn out?", options: ["It fell again", "It was the tallest", "It was too small"], correct: 1 }
+        ]
+      }
+    ],
+    "Level 3": [
+      {
+        title: "The Lighthouse Keeper's Cat",
+        text: "Every evening, old Mr. Callahan climbed the spiral stairs of the lighthouse to light the great lamp. His orange cat, Biscuit, always climbed beside him, tail flicking with each step. One stormy night, the wind howled so loudly that Mr. Callahan almost didn't hear Biscuit's frantic meowing near the window. When he looked outside, he spotted a small fishing boat struggling against the waves. Mr. Callahan quickly radioed for help, and the crew was rescued just in time. The next morning, the fishermen thanked Mr. Callahan — and gave Biscuit a whole plate of fish for being such a good lookout.",
+        questions: [
+          { q: "What is Mr. Callahan's job?", options: ["Fisherman", "Lighthouse keeper", "Sailor"], correct: 1 },
+          { q: "What alerted Mr. Callahan to the boat in trouble?", options: ["A radio call", "Biscuit's meowing", "A loud horn"], correct: 1 },
+          { q: "What does \"frantic\" most likely mean in this story?", options: ["Calm and quiet", "Excited and worried", "Sleepy"], correct: 1 },
+          { q: "Why did the fishermen give Biscuit fish?", options: ["He was hungry", "He helped save them", "It was his birthday"], correct: 1 }
+        ]
+      },
+      {
+        title: "The Science Fair Surprise",
+        text: "Jada spent three weeks building a volcano for the science fair, using baking soda and vinegar to make it erupt. The night before the fair, her little brother accidentally knocked it off the table, and it cracked down the middle. Jada felt like giving up, but her mom suggested fixing it with tape and paint instead of starting over. The next day, judges noticed the repaired crack and asked Jada about it. She explained what happened and how she solved the problem. To her surprise, Jada won a ribbon — not just for the volcano, but for \"Best Problem Solving.\"",
+        questions: [
+          { q: "What happened to Jada's volcano the night before the fair?", options: ["It erupted early", "It cracked", "It got lost"], correct: 1 },
+          { q: "What did Jada's mom suggest?", options: ["Buying a new one", "Giving up", "Fixing it"], correct: 2 },
+          { q: "Why did Jada win a ribbon?", options: ["Her volcano was the biggest", "For solving a problem", "She got there first"], correct: 1 },
+          { q: "What lesson does this story teach?", options: ["Always start over when something breaks", "Mistakes can lead to unexpected success", "Science fairs are not important"], correct: 1 }
+        ]
+      },
+      {
+        title: "The Long Walk Home",
+        text: "When the school bus broke down three miles from town, Mr. Diaz told the students they'd have to walk the rest of the way. At first, everyone groaned. But as they walked along the country road, someone spotted a family of deer in a field, and then a hawk circling overhead. Kids who had never talked much started pointing things out to each other and laughing about the whole adventure. By the time they reached town, tired but grinning, several kids agreed it was the best field trip they'd ever had — even though it started with bad news.",
+        questions: [
+          { q: "Why did the students have to walk?", options: ["They wanted exercise", "The bus broke down", "It was a game"], correct: 1 },
+          { q: "What did the students see along the road?", options: ["Deer and a hawk", "A river", "A farm animal show"], correct: 0 },
+          { q: "How did the students' mood change during the walk?", options: ["It got worse", "It got better", "It stayed the same"], correct: 1 },
+          { q: "What is the best word to describe this walk, based on the story?", options: ["Boring", "Frightening", "Unexpectedly fun"], correct: 2 }
+        ]
+      },
+      {
+        title: "The Recipe for Trouble",
+        text: "Owen wanted to surprise his grandmother by baking her favorite lemon cake all by himself. He measured the flour carefully, but when it came to the sugar, he accidentally grabbed the salt instead — the containers looked almost identical. The cake came out of the oven golden and beautiful, but tasted terribly wrong. Owen was embarrassed, but his grandmother just laughed and said every baker makes mistakes. Together, they tried again, this time double-checking every label. The second cake turned out perfectly, and Owen's grandmother said it was the best gift she'd received in years — mistakes and all.",
+        questions: [
+          { q: "What mistake did Owen make?", options: ["He forgot the flour", "He used salt instead of sugar", "He burned the cake"], correct: 1 },
+          { q: "How did Owen's grandmother react to the first cake?", options: ["She was upset", "She laughed and stayed kind", "She didn't try it"], correct: 1 },
+          { q: "What helped them succeed on the second try?", options: ["A new recipe", "Double-checking labels", "A bigger oven"], correct: 1 },
+          { q: "What is this story mostly about?", options: ["How to bake a cake", "Learning from mistakes", "A grandmother's birthday"], correct: 1 }
+        ]
+      }
+    ]
+  };
+
+  var LEVEL_HINT = {
+    "Level 1": "First Reads — a few short sentences, best for ages 4–5.",
+    "Level 2": "Growing Readers — a short paragraph, best for ages 6–7.",
+    "Level 3": "Chapter Starters — a longer passage, best for ages 8–9."
+  };
+
+  var LETTERS = ["A", "B", "C", "D"];
+
+  var els = {
+    levelInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="level"]')),
+    levelHint: document.getElementById('levelHint'),
+    newStoryBtn: document.getElementById('newStoryBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printWorksheetBtn: document.getElementById('printWorksheetBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetMeta: document.getElementById('sheetMeta'),
+    storyTitle: document.getElementById('storyTitle'),
+    storyText: document.getElementById('storyText'),
+    questions: document.getElementById('questions'),
+    scoreLine: document.getElementById('scoreLine')
+  };
+
+  var currentStory = null;
+  var lastIndexByLevel = {};
+  var selections = {};
+
+  function currentLevel(){
+    var checked = els.levelInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'Level 1';
+  }
+
+  function pickStory(level){
+    var pool = STORIES[level];
+    var idx = Math.floor(Math.random() * pool.length);
+    if (pool.length > 1 && lastIndexByLevel[level] === idx){
+      idx = (idx + 1) % pool.length;
+    }
+    lastIndexByLevel[level] = idx;
+    return pool[idx];
+  }
+
+  function newStory(){
+    var level = currentLevel();
+    currentStory = pickStory(level);
+    selections = {};
+    render();
+  }
+
+  function render(){
+    var level = currentLevel();
+    els.levelHint.textContent = LEVEL_HINT[level];
+    els.statusBadge.textContent = level;
+    els.sheetMeta.textContent = level + ' · ' + currentStory.title;
+    els.storyTitle.textContent = currentStory.title;
+    els.storyText.textContent = currentStory.text;
+
+    els.questions.innerHTML = '';
+    currentStory.questions.forEach(function(item, qIdx){
+      var qWrap = document.createElement('div');
+      qWrap.className = 'question';
+      var qText = document.createElement('p');
+      qText.className = 'q-text';
+      qText.textContent = (qIdx + 1) + '. ' + item.q;
+      qWrap.appendChild(qText);
+
+      var optsWrap = document.createElement('div');
+      optsWrap.className = 'options';
+
+      item.options.forEach(function(opt, oIdx){
+        var row = document.createElement('div');
+        row.className = 'option-row';
+        if (oIdx === item.correct) row.classList.add('is-answer');
+        var inputId = 'q' + qIdx + '-o' + oIdx;
+        row.innerHTML =
+          '<input type="radio" name="q' + qIdx + '" id="' + inputId + '" value="' + oIdx + '">' +
+          '<label for="' + inputId + '"><span class="letter">' + LETTERS[oIdx] + '</span><span>' + opt + '</span></label>';
+        var input = row.querySelector('input');
+        input.addEventListener('change', function(){
+          selections[qIdx] = oIdx;
+          clearChecks();
+        });
+        optsWrap.appendChild(row);
+      });
+
+      qWrap.appendChild(optsWrap);
+      els.questions.appendChild(qWrap);
+    });
+
+    els.scoreLine.hidden = true;
+  }
+
+  function clearChecks(){
+    Array.prototype.slice.call(els.questions.querySelectorAll('.option-row')).forEach(function(row){
+      row.classList.remove('is-correct', 'is-incorrect');
+    });
+    els.scoreLine.hidden = true;
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var rows = Array.prototype.slice.call(els.questions.querySelectorAll('.question'));
+    var correctCount = 0;
+    rows.forEach(function(qWrap, qIdx){
+      var picked = selections[qIdx];
+      var optionRows = Array.prototype.slice.call(qWrap.querySelectorAll('.option-row'));
+      optionRows.forEach(function(row, oIdx){
+        row.classList.remove('is-correct', 'is-incorrect');
+        var isAnswer = row.classList.contains('is-answer');
+        if (picked === oIdx){
+          row.classList.add(isAnswer ? 'is-correct' : 'is-incorrect');
+        } else if (isAnswer && picked !== undefined){
+          row.classList.add('is-correct');
+        }
+      });
+      if (picked === currentStory.questions[qIdx].correct) correctCount++;
+    });
+    var total = currentStory.questions.length;
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correctCount === total
+      ? correctCount + ' out of ' + total + ' correct — great reading! 🎉'
+      : correctCount + ' out of ' + total + ' correct — nice try!';
+  });
+
+  els.levelInputs.forEach(function(i){
+    i.addEventListener('change', newStory);
+  });
+  els.newStoryBtn.addEventListener('click', newStory);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printWorksheetBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  newStory();
+})();
+</script>
