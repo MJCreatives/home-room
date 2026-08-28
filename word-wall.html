@@ -1,0 +1,558 @@
+<title>Word Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 50ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .diff-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .word-grid{
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-bottom: 10px;
+  }
+  .word-chip{ position: relative; }
+  .word-chip input{ position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .word-chip label{
+    display: flex; align-items: center; justify-content: center; height: 38px;
+    border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface-soft);
+    font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 13.5px; color: var(--ink-soft);
+    cursor: pointer; transition: border-color .12s ease, background .12s ease, color .12s ease; padding: 0 6px;
+  }
+  .word-chip input:checked + label{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .word-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-primary:disabled{ opacity: .45; cursor: not-allowed; }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+  select.count-select:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Flashcard sheet ---------- */
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 22px; gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .card-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .flashcard{
+    aspect-ratio: 3 / 2; border: 2px dashed var(--ink-faint); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px;
+    break-inside: avoid;
+  }
+  .flashcard span{
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: clamp(18px, 4vw, 26px);
+    color: var(--ink); word-break: break-word;
+  }
+
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  /* ---------- Log ---------- */
+  .word-history{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .history-chip{
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-soft);
+    background: var(--surface-soft); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
+  }
+  .history-chip strong{ color: var(--accent); }
+
+  table.log-table{ width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.log-table th{
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint);
+    font-weight: 600; padding: 8px 10px; border-bottom: 1.5px solid var(--border);
+  }
+  table.log-table td{ padding: 10px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: top; }
+  table.log-table td.log-date{ font-family: "IBM Plex Mono", monospace; white-space: nowrap; color: var(--ink-soft); }
+  .log-empty{ color: var(--ink-faint); font-size: 13.5px; padding: 10px 0; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    body.printing-cards .log-section{ display: none !important; }
+    body:not(.printing-cards) .flashcard-section{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Reading &amp; Writing</p>
+      <h1>Word Wall 🗂️</h1>
+      <p>Pick a sight-word level, build a practice set, print it as flashcards, and keep a running log of which words you've worked on.</p>
+    </div>
+    <span class="badge" id="statusBadge">0 words selected</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Word Wall settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Level (Dolch sight words)</span>
+      <div class="seg" role="radiogroup" aria-label="Level">
+        <input type="radio" name="level" id="lvl-0" value="Pre-Primer" checked>
+        <label for="lvl-0">Pre-Primer</label>
+        <input type="radio" name="level" id="lvl-1" value="Primer">
+        <label for="lvl-1">Primer</label>
+        <input type="radio" name="level" id="lvl-2" value="Grade 1">
+        <label for="lvl-2">Grade 1</label>
+        <input type="radio" name="level" id="lvl-3" value="Grade 2">
+        <label for="lvl-3">Grade 2</label>
+        <input type="radio" name="level" id="lvl-4" value="Grade 3">
+        <label for="lvl-4">Grade 3</label>
+      </div>
+      <p class="diff-hint" id="levelHint"></p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Words in this level &mdash; click to select</span>
+      <div class="word-grid" id="wordGrid"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-small" id="randomizeBtn" type="button">🎲 Randomize</button>
+        <select class="count-select" id="randomCount" style="padding:7px 12px; font-size:13px;">
+          <option value="8">8 words</option>
+          <option value="12" selected>12 words</option>
+          <option value="16">16 words</option>
+          <option value="20">20 words</option>
+        </select>
+        <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all</button>
+        <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear selection</button>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="logBtn" type="button">📌 Log this set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="printBtn" type="button">Print flashcards</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Flashcard preview</h2>
+  </div>
+
+  <section class="flashcard-section">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Sight Word Flashcards</h3>
+          <div class="meta" id="sheetMeta">Pre-Primer &middot; 0 words</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+  </section>
+
+  <section class="log-section no-print">
+    <div class="sheet-toolbar">
+      <h2>Practice Log</h2>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost btn-small" id="downloadLogBtn" type="button">Download log (.txt)</button>
+        <button class="btn btn-ghost btn-small" id="clearLogBtn" type="button">Clear log</button>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="field-group">
+        <span class="field-label">Words practiced overall</span>
+        <div class="word-history" id="wordHistory"></div>
+      </div>
+      <div class="field-group" style="margin-bottom:0;">
+        <span class="field-label">Sessions</span>
+        <div id="logTableWrap">
+          <table class="log-table">
+            <thead><tr><th style="width:120px;">Date</th><th>Words practiced</th><th style="width:60px;">Count</th></tr></thead>
+            <tbody id="logTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">The log is saved right in this browser &mdash; it'll be here next time you open Word Wall on this device.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DOLCH = {
+    "Pre-Primer": ["a","and","away","big","blue","can","come","down","find","for","funny","go","help","here","I","in","is","it","jump","little","look","make","me","my","not","one","play","red","run","said","see","the","three","to","two","up","we","where","yellow","you"],
+    "Primer": ["all","am","are","at","ate","be","black","brown","but","came","did","do","eat","four","get","good","have","he","into","like","must","new","no","now","on","our","out","please","pretty","ran","ride","saw","say","she","so","soon","that","there","they","this","too","under","want","was","well","went","what","white","who","will","with","yes"],
+    "Grade 1": ["after","again","an","any","as","ask","by","could","every","fly","from","give","going","had","has","her","him","his","how","just","know","let","live","may","of","old","once","open","over","put","round","some","stop","take","thank","them","then","think","walk","were","when"],
+    "Grade 2": ["always","around","because","been","before","best","both","buy","call","cold","does","don't","fast","first","five","found","gave","goes","green","its","made","many","off","or","pull","read","right","sing","sit","sleep","tell","their","these","those","upon","us","use","very","wash","which","why","wish","work","would","write","your"],
+    "Grade 3": ["about","better","bring","carry","clean","cut","done","draw","drink","eight","fall","far","full","got","grow","hold","hot","hurt","if","keep","kind","laugh","light","long","much","myself","never","only","own","pick","seven","shall","show","six","small","start","ten","today","together","try","warm"]
+  };
+
+  var LEVEL_HINT = {
+    "Pre-Primer": "The very first 40 sight words most kids meet — great starting point.",
+    "Primer": "52 words, usually next after Pre-Primer.",
+    "Grade 1": "41 words for early readers building fluency.",
+    "Grade 2": "46 words for more confident readers.",
+    "Grade 3": "41 words, the last Dolch level."
+  };
+
+  var LOG_KEY = "wordWallLog";
+
+  var els = {
+    levelInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="level"]')),
+    levelHint: document.getElementById('levelHint'),
+    wordGrid: document.getElementById('wordGrid'),
+    randomizeBtn: document.getElementById('randomizeBtn'),
+    randomCount: document.getElementById('randomCount'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    logBtn: document.getElementById('logBtn'),
+    printBtn: document.getElementById('printBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetMeta: document.getElementById('sheetMeta'),
+    cardGrid: document.getElementById('cardGrid'),
+    wordHistory: document.getElementById('wordHistory'),
+    logTableBody: document.getElementById('logTableBody'),
+    downloadLogBtn: document.getElementById('downloadLogBtn'),
+    clearLogBtn: document.getElementById('clearLogBtn')
+  };
+
+  var selected = [];
+
+  function currentLevel(){
+    var checked = els.levelInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'Pre-Primer';
+  }
+
+  function buildWordGrid(){
+    var level = currentLevel();
+    var words = DOLCH[level];
+    els.levelHint.textContent = LEVEL_HINT[level];
+    els.wordGrid.innerHTML = '';
+    words.forEach(function(w, idx){
+      var wrap = document.createElement('div');
+      wrap.className = 'word-chip';
+      var id = 'w-' + idx;
+      wrap.innerHTML =
+        '<input type="checkbox" id="' + id + '" value="' + w + '">' +
+        '<label for="' + id + '">' + w + '</label>';
+      els.wordGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.wordGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var w = inp.value;
+        if (inp.checked){
+          if (selected.indexOf(w) === -1) selected.push(w);
+        } else {
+          selected = selected.filter(function(x){ return x !== w; });
+        }
+        render();
+      });
+    });
+  }
+
+  function syncChipStates(){
+    Array.prototype.slice.call(els.wordGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.checked = selected.indexOf(inp.value) !== -1;
+    });
+  }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  els.levelInputs.forEach(function(i){
+    i.addEventListener('change', function(){ selected = []; buildWordGrid(); render(); });
+  });
+
+  els.randomizeBtn.addEventListener('click', function(){
+    var level = currentLevel();
+    var n = parseInt(els.randomCount.value, 10);
+    var words = DOLCH[level];
+    selected = shuffle(words).slice(0, Math.min(n, words.length));
+    render();
+  });
+
+  els.selectAllBtn.addEventListener('click', function(){
+    selected = DOLCH[currentLevel()].slice();
+    render();
+  });
+
+  els.clearAllBtn.addEventListener('click', function(){
+    selected = [];
+    render();
+  });
+
+  function render(){
+    syncChipStates();
+    els.cardGrid.innerHTML = '';
+    if (!selected.length){
+      els.cardGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Select or randomize some words to build flashcards.</div>';
+    } else {
+      selected.forEach(function(w){
+        var card = document.createElement('div');
+        card.className = 'flashcard';
+        card.innerHTML = '<span>' + w + '</span>';
+        els.cardGrid.appendChild(card);
+      });
+    }
+    els.sheetMeta.textContent = currentLevel() + ' · ' + selected.length + ' word' + (selected.length === 1 ? '' : 's');
+    els.statusBadge.textContent = selected.length + ' word' + (selected.length === 1 ? '' : 's') + ' selected';
+    els.logBtn.disabled = !selected.length;
+  }
+
+  /* ---------- Log ---------- */
+  function loadLog(){
+    try {
+      var raw = localStorage.getItem(LOG_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveLog(log){
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch (e) {}
+  }
+
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function renderLog(){
+    var log = loadLog();
+
+    // word history
+    var counts = {};
+    log.forEach(function(entry){
+      entry.words.forEach(function(w){ counts[w] = (counts[w] || 0) + 1; });
+    });
+    var words = Object.keys(counts).sort(function(a, b){ return counts[b] - counts[a] || a.localeCompare(b); });
+    els.wordHistory.innerHTML = '';
+    if (!words.length){
+      els.wordHistory.innerHTML = '<span class="log-empty">No words logged yet &mdash; build a set above and click "Log this set."</span>';
+    } else {
+      words.forEach(function(w){
+        var chip = document.createElement('span');
+        chip.className = 'history-chip';
+        chip.innerHTML = w + ' <strong>&times;' + counts[w] + '</strong>';
+        els.wordHistory.appendChild(chip);
+      });
+    }
+
+    // sessions table
+    els.logTableBody.innerHTML = '';
+    if (!log.length){
+      els.logTableBody.innerHTML = '<tr><td colspan="3" class="log-empty">No sessions logged yet.</td></tr>';
+    } else {
+      log.slice().reverse().forEach(function(entry){
+        var row = document.createElement('tr');
+        row.innerHTML =
+          '<td class="log-date">' + entry.date + '</td>' +
+          '<td>' + entry.words.join(', ') + '</td>' +
+          '<td>' + entry.words.length + '</td>';
+        els.logTableBody.appendChild(row);
+      });
+    }
+  }
+
+  els.logBtn.addEventListener('click', function(){
+    if (!selected.length) return;
+    var log = loadLog();
+    log.push({ date: todayStr(), level: currentLevel(), words: selected.slice() });
+    saveLog(log);
+    renderLog();
+    var original = els.logBtn.textContent;
+    els.logBtn.textContent = '✓ Logged!';
+    setTimeout(function(){ els.logBtn.textContent = original; }, 1400);
+  });
+
+  var clearArmed = false;
+  els.clearLogBtn.addEventListener('click', function(){
+    if (!clearArmed){
+      clearArmed = true;
+      els.clearLogBtn.textContent = 'Click again to confirm';
+      setTimeout(function(){ clearArmed = false; els.clearLogBtn.textContent = 'Clear log'; }, 3000);
+      return;
+    }
+    saveLog([]);
+    clearArmed = false;
+    els.clearLogBtn.textContent = 'Clear log';
+    renderLog();
+  });
+
+  els.downloadLogBtn.addEventListener('click', function(){
+    var log = loadLog();
+    if (!log.length) return;
+    var lines = ['Word Wall practice log', ''];
+    log.forEach(function(entry){
+      lines.push(entry.date + ' (' + entry.level + '): ' + entry.words.join(', '));
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'word-wall-log.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  });
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', function(){ printInNewWindow('printing-cards'); });
+
+  buildWordGrid();
+  selected = shuffle(DOLCH['Pre-Primer']).slice(0, 12);
+  render();
+  renderLog();
+})();
+</script>
