@@ -1,0 +1,475 @@
+<title>Ink Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+
+  .char-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-bottom: 4px; }
+  .char-chip{ position: relative; }
+  .char-chip input{ position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .char-chip label{
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    height: 74px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    cursor: pointer; transition: border-color .12s ease, background .12s ease, color .12s ease; padding: 6px 4px;
+  }
+  .char-chip .cc-glyph{ font-family: "Noto Sans HK", "IBM Plex Sans", sans-serif; font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1; }
+  .char-chip .cc-jp{ font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--ink-soft); }
+  .char-chip .cc-en{ font-size: 9.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.03em; }
+  .char-chip input:checked + label{ border-color: var(--accent); background: var(--accent-soft); }
+  .char-chip input:checked + label .cc-glyph{ color: var(--accent); }
+  .char-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .check-row{ display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); margin-top: 6px; }
+  .check-row input{ width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .check-row label{ cursor: pointer; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  /* ---------- Character row ---------- */
+  .char-row{ display: flex; flex-direction: column; gap: 16px; padding: 22px 0; border-top: 1px solid var(--border); break-inside: avoid; }
+  .char-row:first-child{ border-top: none; padding-top: 0; }
+
+  .char-row-head{ display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+  .ref-svg-wrap{ width: 108px; height: 108px; flex-shrink: 0; }
+  .ref-svg-wrap svg{ width: 100%; height: 100%; }
+
+  .char-info{ flex: 1; min-width: 180px; }
+  .char-info .jp-row{ display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .char-info .jyutping{
+    font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid var(--accent-soft-border); border-radius: 6px; padding: 2px 9px;
+  }
+  .char-info .meaning{ font-family: "Fraunces", serif; font-size: 17px; font-weight: 600; color: var(--ink); text-transform: capitalize; }
+
+  .origin-block{ display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .origin-svg-wrap{ width: 46px; height: 46px; flex-shrink: 0; }
+  .origin-svg-wrap svg{ width: 100%; height: 100%; }
+  .origin-caption{ font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; max-width: 42ch; }
+
+  .practice-strip{ display: flex; gap: 12px; flex-wrap: wrap; }
+  .tzg-box{
+    position: relative; width: 74px; height: 74px; border: 1.5px solid var(--ink-faint); border-radius: 6px;
+    background: var(--surface); flex-shrink: 0;
+  }
+  .tzg-box::before, .tzg-box::after{ content: ""; position: absolute; background: repeating-linear-gradient(to bottom, var(--border) 0 4px, transparent 4px 8px); }
+  .tzg-box::before{ left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+  .tzg-box::after{ top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); background: repeating-linear-gradient(to right, var(--border) 0 4px, transparent 4px 8px); }
+  .tzg-box svg{ position: relative; width: 100%; height: 100%; }
+
+  /* Stroke rendering */
+  .stroke-line{ fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .stroke-line.trace{ stroke: var(--ink-faint); stroke-width: 5; stroke-dasharray: 3 6; opacity: 0.55; }
+  .stroke-badge{ fill: var(--accent); }
+  .stroke-badge-text{ fill: #fff; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+    .tzg-box{ border-color: var(--ink-faint) !important; background: #fff !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Life &amp; Extras</p>
+      <h1>Ink Garden 🖌️</h1>
+      <p>Learn Cantonese characters &mdash; jyutping, what the character means, how it began as a picture, and boxes to practice drawing it.</p>
+    </div>
+    <span class="badge" id="statusBadge">0 characters selected</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Ink Garden settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Characters &mdash; click to select</span>
+      <div class="char-grid" id="charGrid"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all</button>
+        <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear selection</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Options</span>
+      <div class="check-row">
+        <input type="checkbox" id="showArrows" checked>
+        <label for="showArrows">Show numbered stroke-order arrows</label>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="showOrigin" checked>
+        <label for="showOrigin">Show "how it began as a picture"</label>
+      </div>
+      <div class="check-row" style="margin-top: 10px;">
+        <label for="boxCount" style="cursor:default;">Practice boxes per character:</label>
+        <select class="count-select" id="boxCount" style="margin-left:4px;">
+          <option value="4">4 boxes</option>
+          <option value="6" selected>6 boxes</option>
+          <option value="8">8 boxes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="printBtn" type="button">Print practice sheet</button>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="char-section">
+    <div class="sheet">
+      <div class="print-title">Ink Garden &mdash; Cantonese Character Practice</div>
+      <div id="rowsWrap"></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Jyutping is the standard romanization for Cantonese pronunciation &mdash; numbers show the tone.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  function badge(n, x, y){
+    return '<circle class="stroke-badge" cx="' + x + '" cy="' + y + '" r="7.5"></circle>' +
+           '<text class="stroke-badge-text" x="' + x + '" y="' + y + '">' + n + '</text>';
+  }
+
+  var CHARS = [
+    { key: "一", jp: "jat1", en: "one",
+      strokes: [ { d: "M20,50 L80,50", s: [20,50] } ],
+      origin: "One straight line is the simplest way to show the number one.",
+      originSvg: '<line x1="10" y1="30" x2="50" y2="30" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+    },
+    { key: "二", jp: "ji6", en: "two",
+      strokes: [ { d: "M30,35 L70,35", s: [30,35] }, { d: "M20,65 L80,65", s: [20,65] } ],
+      origin: "Two lines stacked together show the number two.",
+      originSvg: '<line x1="10" y1="20" x2="42" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="6" y1="38" x2="54" y2="38" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+    },
+    { key: "三", jp: "saam1", en: "three",
+      strokes: [ { d: "M32,25 L68,25", s: [32,25] }, { d: "M26,50 L74,50", s: [26,50] }, { d: "M20,75 L80,75", s: [20,75] } ],
+      origin: "Three lines stacked together show the number three.",
+      originSvg: '<line x1="10" y1="10" x2="38" y2="10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><line x1="7" y1="24" x2="43" y2="24" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><line x1="4" y1="38" x2="48" y2="38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>'
+    },
+    { key: "人", jp: "jan4", en: "person",
+      strokes: [ { d: "M50,20 Q40,50 22,80", s: [50,20] }, { d: "M52,32 Q62,55 82,80", s: [52,32] } ],
+      origin: "This character is a picture of a person's two legs, standing and walking.",
+      originSvg: '<circle cx="30" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="3"/><line x1="30" y1="14" x2="30" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="30" x2="18" y2="48" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="30" x2="42" y2="48" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>'
+    },
+    { key: "大", jp: "daai6", en: "big",
+      strokes: [ { d: "M18,38 L82,38", s: [18,38] }, { d: "M50,15 Q45,45 22,85", s: [50,15] }, { d: "M52,18 Q60,45 82,85", s: [52,18] } ],
+      origin: "This character shows a person standing with arms and legs stretched wide — as big as they can be.",
+      originSvg: '<circle cx="30" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="3"/><line x1="12" y1="20" x2="48" y2="20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="20" x2="16" y2="48" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="20" x2="44" y2="48" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>'
+    },
+    { key: "小", jp: "siu2", en: "small",
+      strokes: [ { d: "M50,30 L50,62 Q47,70 41,74", s: [50,30] }, { d: "M35,45 L28,60", s: [35,45] }, { d: "M65,45 L72,60", s: [65,45] } ],
+      origin: "This character shows a few tiny dots — like little grains of sand.",
+      originSvg: '<circle cx="20" cy="24" r="3" fill="currentColor"/><circle cx="8" cy="30" r="2.5" fill="currentColor"/><circle cx="32" cy="30" r="2.5" fill="currentColor"/>'
+    },
+    { key: "山", jp: "saan1", en: "mountain",
+      strokes: [ { d: "M22,55 L22,78", s: [22,55] }, { d: "M50,20 L50,78", s: [50,20] }, { d: "M78,50 L78,78 L22,78", s: [78,50] } ],
+      origin: "This character is a picture of three mountain peaks in a row.",
+      originSvg: '<path d="M4,32 L14,10 L20,20 L28,4 L38,32 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>'
+    },
+    { key: "水", jp: "seoi2", en: "water",
+      strokes: [ { d: "M50,20 L50,55 Q48,62 42,66", s: [50,20] }, { d: "M42,35 L25,50", s: [42,35] }, { d: "M45,50 Q35,70 20,85", s: [45,50] }, { d: "M52,45 Q65,65 82,85", s: [52,45] } ],
+      origin: "This character comes from a picture of a flowing river with little ripples.",
+      originSvg: '<path d="M2,10 Q8,4 14,10 T26,10 T38,10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M2,22 Q8,16 14,22 T26,22 T38,22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>'
+    },
+    { key: "火", jp: "fo2", en: "fire",
+      strokes: [ { d: "M48,18 L52,26", s: [48,18] }, { d: "M55,25 L35,50", s: [55,25] }, { d: "M48,35 Q38,60 22,85", s: [48,35] }, { d: "M52,35 Q64,60 80,85", s: [52,35] } ],
+      origin: "This character comes from a picture of flickering flames rising up.",
+      originSvg: '<path d="M20,4 Q28,14 20,22 Q14,26 16,32 Q20,36 26,32 Q34,26 28,16 Q26,10 20,4 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>'
+    },
+    { key: "木", jp: "muk6", en: "tree",
+      strokes: [ { d: "M22,38 L78,38", s: [22,38] }, { d: "M50,18 L50,82", s: [50,18] }, { d: "M48,45 L25,70", s: [48,45] }, { d: "M52,45 L78,72", s: [52,45] } ],
+      origin: "This character is a picture of a tree, with branches reaching up and roots reaching down.",
+      originSvg: '<line x1="20" y1="4" x2="20" y2="34" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="4" y1="12" x2="36" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="20" x2="8" y2="30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="20" x2="32" y2="30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>'
+    },
+    { key: "日", jp: "jat6", en: "sun / day",
+      strokes: [ { d: "M25,20 L25,80", s: [25,20] }, { d: "M25,20 L75,20 L75,80", s: [27,19] }, { d: "M25,50 L75,50", s: [25,50] }, { d: "M25,80 L75,80", s: [25,80] } ],
+      origin: "This character was once a circle with a dot inside, like the sun — over time it became a square.",
+      originSvg: '<circle cx="20" cy="18" r="14" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="20" cy="18" r="2.5" fill="currentColor"/>'
+    },
+    { key: "月", jp: "jyut6", en: "moon / month",
+      strokes: [ { d: "M35,20 Q22,50 30,82", s: [35,20] }, { d: "M35,20 L70,20 L70,78 Q70,84 64,84", s: [37,19] }, { d: "M35,42 L62,42", s: [35,42] }, { d: "M35,60 L62,60", s: [35,60] } ],
+      origin: "This character is a picture of a crescent moon in the night sky.",
+      originSvg: '<path d="M28,2 A16,16 0 1 0 28,34 A12,13 0 1 1 28,2 Z" fill="currentColor"/>'
+    },
+    { key: "口", jp: "hau2", en: "mouth",
+      strokes: [ { d: "M28,30 L28,75", s: [28,30] }, { d: "M28,30 L72,30 L72,75", s: [30,29] }, { d: "M28,75 L72,75", s: [28,75] } ],
+      origin: "This character is a picture of an open mouth.",
+      originSvg: '<rect x="6" y="8" width="28" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>'
+    },
+    { key: "田", jp: "tin4", en: "field",
+      strokes: [ { d: "M25,22 L25,78", s: [25,22] }, { d: "M25,22 L75,22 L75,78", s: [27,21] }, { d: "M50,22 L50,78", s: [50,22] }, { d: "M25,50 L75,50", s: [25,50] }, { d: "M25,78 L75,78", s: [25,78] } ],
+      origin: "This character is a picture of a farm field, divided into four little plots.",
+      originSvg: '<rect x="4" y="4" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="18" y1="4" x2="18" y2="32" stroke="currentColor" stroke-width="2.5"/><line x1="4" y1="18" x2="32" y2="18" stroke="currentColor" stroke-width="2.5"/>'
+    }
+  ];
+
+  var CHAR_MAP = {};
+  CHARS.forEach(function(c){ CHAR_MAP[c.key] = c; });
+
+  function strokesToSvg(strokes, mode){
+    var parts = [];
+    strokes.forEach(function(st, idx){
+      var cls = mode === 'trace' ? 'stroke-line trace' : 'stroke-line';
+      parts.push('<path class="' + cls + '" d="' + st.d + '"></path>');
+      if (mode === 'arrows'){
+        parts.push(badge(idx + 1, st.s[0], st.s[1]));
+      }
+    });
+    return '<svg viewBox="0 0 100 100">' + parts.join('') + '</svg>';
+  }
+
+  var els = {
+    charGrid: document.getElementById('charGrid'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    showArrows: document.getElementById('showArrows'),
+    showOrigin: document.getElementById('showOrigin'),
+    boxCount: document.getElementById('boxCount'),
+    printBtn: document.getElementById('printBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    rowsWrap: document.getElementById('rowsWrap')
+  };
+
+  var sequence = []; // ordered list of character keys
+
+  function buildCharGrid(){
+    els.charGrid.innerHTML = '';
+    CHARS.forEach(function(c, idx){
+      var wrap = document.createElement('div');
+      wrap.className = 'char-chip';
+      var id = 'char-' + idx;
+      wrap.innerHTML =
+        '<input type="checkbox" id="' + id + '" value="' + c.key + '">' +
+        '<label for="' + id + '">' +
+          '<span class="cc-glyph">' + c.key + '</span>' +
+          '<span class="cc-jp">' + c.jp + '</span>' +
+          '<span class="cc-en">' + c.en + '</span>' +
+        '</label>';
+      els.charGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.charGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if (inp.checked){
+          if (sequence.indexOf(inp.value) === -1) sequence.push(inp.value);
+        } else {
+          sequence = sequence.filter(function(k){ return k !== inp.value; });
+        }
+        render();
+      });
+    });
+  }
+
+  function syncChipStates(){
+    Array.prototype.slice.call(els.charGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.checked = sequence.indexOf(inp.value) !== -1;
+    });
+  }
+
+  els.selectAllBtn.addEventListener('click', function(){
+    sequence = CHARS.map(function(c){ return c.key; });
+    render();
+  });
+  els.clearAllBtn.addEventListener('click', function(){
+    sequence = [];
+    render();
+  });
+  els.showArrows.addEventListener('change', render);
+  els.showOrigin.addEventListener('change', render);
+  els.boxCount.addEventListener('change', render);
+
+  function render(){
+    syncChipStates();
+    els.statusBadge.textContent = sequence.length + ' character' + (sequence.length === 1 ? '' : 's') + ' selected';
+
+    var showArrows = els.showArrows.checked;
+    var showOrigin = els.showOrigin.checked;
+    var boxCount = parseInt(els.boxCount.value, 10);
+    var traceCount = Math.min(2, boxCount);
+
+    els.rowsWrap.innerHTML = '';
+
+    if (!sequence.length){
+      els.rowsWrap.innerHTML = '<div class="empty-state">Select some characters above to build a practice sheet.</div>';
+      return;
+    }
+
+    sequence.forEach(function(key){
+      var c = CHAR_MAP[key];
+      var row = document.createElement('div');
+      row.className = 'char-row';
+
+      var originHtml = showOrigin
+        ? '<div class="origin-block"><div class="origin-svg-wrap"><svg viewBox="0 0 40 40" style="color:var(--ink-soft);">' + c.originSvg + '</svg></div><div class="origin-caption">' + c.origin + '</div></div>'
+        : '';
+
+      var boxesHtml = '';
+      for (var i = 0; i < boxCount; i++){
+        var inner = i < traceCount ? strokesToSvg(c.strokes, 'trace') : '';
+        boxesHtml += '<div class="tzg-box">' + inner + '</div>';
+      }
+
+      row.innerHTML =
+        '<div class="char-row-head">' +
+          '<div class="ref-svg-wrap">' + strokesToSvg(c.strokes, showArrows ? 'arrows' : 'plain') + '</div>' +
+          '<div class="char-info">' +
+            '<div class="jp-row"><span class="jyutping">' + c.jp + '</span><span class="meaning">' + c.en + '</span></div>' +
+            originHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="practice-strip">' + boxesHtml + '</div>';
+
+      els.rowsWrap.appendChild(row);
+    });
+  }
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){ window.print(); return; }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body>' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', printInNewWindow);
+
+  buildCharGrid();
+  sequence = ["人", "大", "小", "山", "水", "火"];
+  render();
+})();
+</script>
