@@ -1,0 +1,530 @@
+<title>Count &amp; Trace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .field-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .digit-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
+  .digit-chip{ position: relative; }
+  .digit-chip input{ position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .digit-chip label{
+    display: flex; align-items: center; justify-content: center; height: 46px;
+    border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 18px; color: var(--ink-soft);
+    cursor: pointer; transition: border-color .12s ease, background .12s ease, color .12s ease;
+  }
+  .digit-chip input:checked + label{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .digit-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+
+  .check-row{ display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); }
+  .check-row input{ width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .check-row label{ cursor: pointer; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  /* ---------- Trace mode ---------- */
+  .trace-row{ display: flex; align-items: center; gap: 20px; padding: 16px 0; border-top: 1px solid var(--border); flex-wrap: wrap; break-inside: avoid; }
+  .trace-row:first-child{ border-top: none; }
+  .ref-svg-wrap{ width: 64px; height: 82px; flex-shrink: 0; }
+  .ref-svg-wrap svg{ width: 100%; height: 100%; }
+  .trace-line-wrap{ flex: 1; min-width: 240px; position: relative; height: 82px; }
+  .primary-lines{ position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; }
+  .primary-lines .rule{ border-bottom: 1.5px solid var(--ink-faint); height: 0; }
+  .primary-lines .rule.mid{ border-bottom: 1px dashed var(--border); }
+  .trace-digits{ position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 10px; padding: 4px 6px 4px; }
+  .trace-digits svg{ height: 78px; width: auto; }
+
+  .stroke-line{ fill: none; stroke: var(--ink); stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; }
+  .stroke-line.faded{ stroke: var(--ink-faint); opacity: 0.6; }
+  .stroke-badge{ fill: var(--accent); }
+  .stroke-badge-text{ fill: #fff; font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+
+  /* ---------- Count mode ---------- */
+  .count-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; }
+  .count-card{ display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; background: var(--surface-soft); break-inside: avoid; }
+  .count-card .icon-row{ display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; font-size: 26px; max-width: 150px; min-height: 64px; align-items: center; }
+  .count-answer{ display: flex; align-items: center; gap: 8px; }
+  .count-answer input{
+    width: 46px; height: 46px; text-align: center; font-family: "IBM Plex Mono", monospace;
+    font-size: 20px; font-weight: 700; color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 8px;
+  }
+  .count-answer input:focus-visible{ outline: 2px solid var(--focus); outline-offset: 1px; }
+  .count-card.is-correct{ border-color: #B9E0CA; background: #E3F3EB; }
+  .count-card.is-incorrect{ border-color: #EBC0BA; background: #F7E1DE; }
+  .print-only-answer{ display: none; }
+
+  .score-line{
+    margin-top: 6px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+    .count-card{ background: #fff !important; border-color: var(--border) !important; }
+    .count-answer input{ display: none !important; }
+    body:not(.printing-answers) .print-only-answer{ display: none !important; }
+    body.printing-answers .print-only-answer{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 22px; color: #2E7D5B; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Math</p>
+      <h1>Count &amp; Trace 🔢</h1>
+      <p>Practice writing numbers 0&ndash;9, or count groups of pictures and write how many.</p>
+    </div>
+    <span class="badge" id="statusBadge">Trace numbers</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Count &amp; Trace settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Activity</span>
+      <div class="seg" role="radiogroup" aria-label="Activity">
+        <input type="radio" name="mode" id="mode-trace" value="trace" checked>
+        <label for="mode-trace">Trace numbers</label>
+        <input type="radio" name="mode" id="mode-count" value="count">
+        <label for="mode-count">Count &amp; write</label>
+      </div>
+    </div>
+
+    <div id="traceControls">
+      <div class="field-group">
+        <span class="field-label">Numbers &mdash; click to select</span>
+        <div class="digit-grid" id="digitGrid"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all</button>
+          <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear selection</button>
+        </div>
+      </div>
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div class="check-row">
+          <input type="checkbox" id="showArrows" checked>
+          <label for="showArrows">Show numbered stroke-order arrows</label>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="traceRepeats" style="font-size:13.5px; cursor:default;">Repeats per row:</label>
+          <select class="count-select" id="traceRepeats">
+            <option value="4">4</option>
+            <option value="6" selected>6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="countControls" style="display:none;">
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="maxCount" style="font-size:13.5px; cursor:default;">Count up to:</label>
+          <select class="count-select" id="maxCount">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="problemCount" style="font-size:13.5px; cursor:default;">How many groups:</label>
+          <select class="count-select" id="problemCount">
+            <option value="6">6</option>
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost no-print" id="checkBtn" type="button" style="display:none;">Check my answers</button>
+        <button class="btn btn-ghost" id="printBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button" style="display:none;">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="body-section">
+    <div class="sheet" id="sheetBody">
+      <div class="print-title" id="printTitle">Count &amp; Trace</div>
+      <div id="contentWrap"></div>
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">New sets are generated fresh each time &mdash; hit "New set" any time for more practice.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  function badge(n, x, y){
+    return '<circle class="stroke-badge" cx="' + x + '" cy="' + y + '" r="7"></circle>' +
+           '<text class="stroke-badge-text" x="' + x + '" y="' + y + '">' + n + '</text>';
+  }
+
+  var DIGITS = {
+    "0": { strokes: [ { d: "M50,15 C25,15 15,40 15,65 C15,90 25,115 50,115 C75,115 85,90 85,65 C85,40 75,15 50,15 Z", s: [50,15] } ] },
+    "1": { strokes: [ { d: "M35,30 L50,15 L50,115", s: [35,30] } ] },
+    "2": { strokes: [ { d: "M20,35 C20,15 45,8 62,20 C78,32 68,50 48,68 C35,80 25,92 20,105 L85,105", s: [20,35] } ] },
+    "3": { strokes: [ { d: "M20,25 C35,10 72,10 72,35 C72,50 58,60 46,63 C58,66 74,76 74,92 C74,116 35,118 20,102", s: [20,25] } ] },
+    "4": { strokes: [ { d: "M65,15 L20,80 L85,80", s: [65,15] }, { d: "M67,58 L67,115", s: [67,58] } ] },
+    "5": { strokes: [ { d: "M25,58 C60,50 82,68 80,88 C78,108 55,120 28,110", s: [25,58] }, { d: "M78,15 L25,15 L25,58", s: [78,15] } ] },
+    "6": { strokes: [ { d: "M70,20 C40,20 20,50 20,78 C20,100 36,116 55,116 C74,116 86,102 86,84 C86,66 72,56 55,56 C40,56 28,66 25,80", s: [70,20] } ] },
+    "7": { strokes: [ { d: "M20,18 L82,18", s: [20,18] }, { d: "M82,18 L35,115", s: [82,18] } ] },
+    "8": { strokes: [
+      { d: "M50,62 C32,62 20,50 20,36 C20,20 33,10 50,10 C67,10 80,20 80,36 C80,50 68,62 50,62 Z", s: [50,10] },
+      { d: "M50,62 C30,62 16,78 16,92 C16,108 30,120 50,120 C70,120 84,108 84,92 C84,78 70,62 50,62 Z", s: [50,120] }
+    ] },
+    "9": { strokes: [ { d: "M65,58 C80,54 80,38 80,32 C80,18 68,10 52,10 C36,10 22,20 22,36 C22,52 36,62 52,62 C62,62 70,58 74,52 C74,80 66,105 30,113", s: [65,58] } ] }
+  };
+  var ORDER = ["0","1","2","3","4","5","6","7","8","9"];
+
+  var COUNT_ICONS = ["🍎","🐝","⭐","🍓","🐟","🌸","🍪","🐞","🎈","🍁","🐸","🍇"];
+
+  function strokesToSvg(strokes, mode){
+    var parts = [];
+    strokes.forEach(function(st, idx){
+      var cls = mode === 'faded' ? 'stroke-line faded' : 'stroke-line';
+      parts.push('<path class="' + cls + '" d="' + st.d + '"></path>');
+      if (mode === 'arrows'){ parts.push(badge(idx + 1, st.s[0], st.s[1])); }
+    });
+    return '<svg viewBox="0 0 100 130">' + parts.join('') + '</svg>';
+  }
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    traceControls: document.getElementById('traceControls'),
+    countControls: document.getElementById('countControls'),
+    digitGrid: document.getElementById('digitGrid'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    showArrows: document.getElementById('showArrows'),
+    traceRepeats: document.getElementById('traceRepeats'),
+    maxCount: document.getElementById('maxCount'),
+    problemCount: document.getElementById('problemCount'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printBtn: document.getElementById('printBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    printTitle: document.getElementById('printTitle'),
+    contentWrap: document.getElementById('contentWrap'),
+    sheetBody: document.getElementById('sheetBody'),
+    scoreLine: document.getElementById('scoreLine')
+  };
+
+  var sequence = ["1","2","3","4","5"];
+  var countProblems = [];
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'trace';
+  }
+
+  function buildDigitGrid(){
+    els.digitGrid.innerHTML = '';
+    ORDER.forEach(function(d){
+      var wrap = document.createElement('div');
+      wrap.className = 'digit-chip';
+      var id = 'digit-' + d;
+      wrap.innerHTML = '<input type="checkbox" id="' + id + '" value="' + d + '"><label for="' + id + '">' + d + '</label>';
+      els.digitGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.digitGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if (inp.checked){
+          if (sequence.indexOf(inp.value) === -1) sequence.push(inp.value);
+        } else {
+          sequence = sequence.filter(function(v){ return v !== inp.value; });
+        }
+        render();
+      });
+    });
+  }
+  function syncDigitChips(){
+    Array.prototype.slice.call(els.digitGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.checked = sequence.indexOf(inp.value) !== -1;
+    });
+  }
+  els.selectAllBtn.addEventListener('click', function(){ sequence = ORDER.slice(); render(); });
+  els.clearAllBtn.addEventListener('click', function(){ sequence = []; render(); });
+  els.showArrows.addEventListener('change', render);
+  els.traceRepeats.addEventListener('change', render);
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+
+  function newCountSet(){
+    var max = parseInt(els.maxCount.value, 10);
+    var n = parseInt(els.problemCount.value, 10);
+    countProblems = [];
+    for (var i = 0; i < n; i++){
+      var qty = 1 + Math.floor(Math.random() * max);
+      var icon = COUNT_ICONS[Math.floor(Math.random() * COUNT_ICONS.length)];
+      countProblems.push({ qty: qty, icon: icon });
+    }
+  }
+
+  function switchMode(){
+    var mode = currentMode();
+    els.statusBadge.textContent = mode === 'trace' ? 'Trace numbers' : 'Count & write';
+    els.traceControls.style.display = mode === 'trace' ? '' : 'none';
+    els.countControls.style.display = mode === 'count' ? '' : 'none';
+    els.checkBtn.style.display = mode === 'count' ? '' : 'none';
+    els.printAnswersBtn.style.display = mode === 'count' ? '' : 'none';
+    els.printTitle.textContent = mode === 'trace' ? 'Count & Trace — Number Writing Practice' : 'Count & Trace — Count & Write';
+    if (mode === 'count' && !countProblems.length) newCountSet();
+    render();
+  }
+
+  function render(){
+    var mode = currentMode();
+    els.scoreLine.hidden = true;
+    els.sheetBody.className = 'sheet';
+
+    if (mode === 'trace'){
+      syncDigitChips();
+      var showArrows = els.showArrows.checked;
+      var repeats = parseInt(els.traceRepeats.value, 10);
+      els.contentWrap.innerHTML = '';
+      if (!sequence.length){
+        els.contentWrap.innerHTML = '<div class="empty-state">Select some numbers above to build a practice sheet.</div>';
+        return;
+      }
+      sequence.forEach(function(d){
+        var row = document.createElement('div');
+        row.className = 'trace-row';
+        var digitsHtml = '';
+        for (var i = 0; i < repeats; i++){
+          digitsHtml += strokesToSvg(DIGITS[d].strokes, i === 0 ? (showArrows ? 'arrows' : 'plain') : 'faded');
+        }
+        row.innerHTML =
+          '<div class="ref-svg-wrap">' + strokesToSvg(DIGITS[d].strokes, showArrows ? 'arrows' : 'plain') + '</div>' +
+          '<div class="trace-line-wrap">' +
+            '<div class="primary-lines"><div class="rule"></div><div class="rule mid"></div><div class="rule"></div></div>' +
+            '<div class="trace-digits">' + digitsHtml + '</div>' +
+          '</div>';
+        els.contentWrap.appendChild(row);
+      });
+    } else {
+      els.contentWrap.innerHTML = '';
+      if (!countProblems.length){
+        els.contentWrap.innerHTML = '<div class="empty-state">Click "New set" to generate groups to count.</div>';
+        return;
+      }
+      var grid = document.createElement('div');
+      grid.className = 'count-grid';
+      countProblems.forEach(function(p, idx){
+        var card = document.createElement('div');
+        card.className = 'count-card';
+        var icons = '';
+        for (var i = 0; i < p.qty; i++){ icons += '<span class="icon-item">' + p.icon + '</span>'; }
+        card.innerHTML =
+          '<div class="icon-row">' + icons + '</div>' +
+          '<div class="count-answer">' +
+            '<input type="text" inputmode="numeric" maxlength="2" aria-label="How many">' +
+            '<span class="print-only-answer">' + p.qty + '</span>' +
+          '</div>';
+        card.querySelector('input').addEventListener('input', function(){
+          card.classList.remove('is-correct', 'is-incorrect');
+          els.scoreLine.hidden = true;
+        });
+        grid.appendChild(card);
+      });
+      els.contentWrap.appendChild(grid);
+    }
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var cards = Array.prototype.slice.call(els.contentWrap.querySelectorAll('.count-card'));
+    var correct = 0;
+    cards.forEach(function(card, idx){
+      var val = card.querySelector('input').value.trim();
+      var ok = val !== '' && parseInt(val, 10) === countProblems[idx].qty;
+      card.classList.remove('is-correct', 'is-incorrect');
+      card.classList.add(ok ? 'is-correct' : 'is-incorrect');
+      if (ok) correct++;
+    });
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correct === cards.length
+      ? correct + ' out of ' + cards.length + ' correct — great counting! 🎉'
+      : correct + ' out of ' + cards.length + ' correct — keep practicing!';
+  });
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', switchMode); });
+  els.newBtn.addEventListener('click', function(){
+    if (currentMode() === 'count'){ newCountSet(); }
+    render();
+  });
+  els.maxCount.addEventListener('change', newCountSet);
+  els.problemCount.addEventListener('change', newCountSet);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  buildDigitGrid();
+  switchMode();
+})();
+</script>

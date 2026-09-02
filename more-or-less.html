@@ -1,0 +1,446 @@
+<title>More &amp; Less</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  /* ---------- Compare cards ---------- */
+  .compare-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+  .compare-card{
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    border: 1.5px solid var(--border); border-radius: 14px; padding: 18px 14px; background: var(--surface-soft);
+    break-inside: avoid;
+  }
+  .compare-value{ flex: 1; display: flex; align-items: center; justify-content: center; min-height: 62px; }
+  .compare-value .icon-row{ display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; font-size: 21px; max-width: 120px; }
+  .compare-value .num{ font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 34px; color: var(--ink); }
+
+  .symbol-picker{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface); gap: 3px; flex-shrink: 0; }
+  .symbol-picker button{
+    width: 30px; height: 34px; border: none; background: transparent; border-radius: 7px;
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 17px; color: var(--ink-soft); cursor: pointer;
+  }
+  .symbol-picker button.is-selected{ background: var(--accent); color: var(--accent-ink); }
+  .symbol-picker button:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .print-blank-box{ display: none; }
+  .print-only-answer{ display: none; }
+
+  .compare-card.is-correct{ border-color: #B9E0CA; background: #E3F3EB; }
+  .compare-card.is-incorrect{ border-color: #EBC0BA; background: #F7E1DE; }
+
+  .score-line{
+    margin-top: 18px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  /* ---------- Trace-shape mode reused for "circle it" bonus row ---------- */
+  .hint-row{ display:flex; align-items:center; gap:8px; font-size: 13px; color: var(--ink-faint); margin-top: 14px; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+    .compare-card{ background: #fff !important; border-color: var(--border) !important; }
+    .symbol-picker{ display: none !important; }
+    .print-blank-box{
+      display: flex !important; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 42px; height: 42px; border: 1.5px solid var(--ink); border-radius: 8px;
+    }
+    body:not(.printing-answers) .print-only-answer{ display: none !important; }
+    body.printing-answers .print-only-answer{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 20px; color: #2E7D5B; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Math</p>
+      <h1>More &amp; Less &#9878;&#65039;</h1>
+      <p>Compare two groups or two numbers and choose &lt;, =, or &gt; &mdash; a printable practice sheet with an answer key.</p>
+    </div>
+    <span class="badge" id="statusBadge">Compare groups</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">More &amp; Less settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Activity</span>
+      <div class="seg" role="radiogroup" aria-label="Activity">
+        <input type="radio" name="mode" id="mode-groups" value="groups" checked>
+        <label for="mode-groups">Compare groups</label>
+        <input type="radio" name="mode" id="mode-numbers" value="numbers">
+        <label for="mode-numbers">Compare numbers</label>
+      </div>
+    </div>
+
+    <div id="groupsControls">
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="maxGroup" style="font-size:13.5px; cursor:default;">Count up to:</label>
+          <select class="count-select" id="maxGroup">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="problemGroup" style="font-size:13.5px; cursor:default;">How many pairs:</label>
+          <select class="count-select" id="problemGroup">
+            <option value="6">6</option>
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="numbersControls" style="display:none;">
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="maxNumber" style="font-size:13.5px; cursor:default;">Numbers up to:</label>
+          <select class="count-select" id="maxNumber">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="problemNumber" style="font-size:13.5px; cursor:default;">How many pairs:</label>
+          <select class="count-select" id="problemNumber">
+            <option value="6">6</option>
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost no-print" id="checkBtn" type="button">Check my answers</button>
+        <button class="btn btn-ghost" id="printBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="body-section">
+    <div class="sheet" id="sheetBody">
+      <div class="print-title" id="printTitle">More &amp; Less</div>
+      <div id="contentWrap"></div>
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Click &lt;, =, or &gt; on each card, then "Check my answers." New sets are generated fresh each time.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var GROUP_ICONS = ["🍎","🐝","⭐","🍓","🐟","🌸","🍪","🐞","🎈","🍁","🐸","🍇"];
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    groupsControls: document.getElementById('groupsControls'),
+    numbersControls: document.getElementById('numbersControls'),
+    maxGroup: document.getElementById('maxGroup'),
+    problemGroup: document.getElementById('problemGroup'),
+    maxNumber: document.getElementById('maxNumber'),
+    problemNumber: document.getElementById('problemNumber'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printBtn: document.getElementById('printBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    printTitle: document.getElementById('printTitle'),
+    contentWrap: document.getElementById('contentWrap'),
+    sheetBody: document.getElementById('sheetBody'),
+    scoreLine: document.getElementById('scoreLine')
+  };
+
+  var problems = [];
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'groups';
+  }
+
+  function symbolFor(a, b){ return a < b ? '<' : (a > b ? '>' : '='); }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+
+  function newSet(){
+    var mode = currentMode();
+    problems = [];
+    if (mode === 'groups'){
+      var max = parseInt(els.maxGroup.value, 10);
+      var n = parseInt(els.problemGroup.value, 10);
+      for (var i = 0; i < n; i++){
+        var icons = shuffle(GROUP_ICONS);
+        var a = 1 + Math.floor(Math.random() * max);
+        var b = 1 + Math.floor(Math.random() * max);
+        problems.push({ a: a, b: b, iconA: icons[0], iconB: icons[1] });
+      }
+    } else {
+      var maxN = parseInt(els.maxNumber.value, 10);
+      var nN = parseInt(els.problemNumber.value, 10);
+      for (var j = 0; j < nN; j++){
+        var na = Math.floor(Math.random() * (maxN + 1));
+        var nb = Math.floor(Math.random() * (maxN + 1));
+        problems.push({ a: na, b: nb });
+      }
+    }
+  }
+
+  function switchMode(){
+    var mode = currentMode();
+    els.statusBadge.textContent = mode === 'groups' ? 'Compare groups' : 'Compare numbers';
+    els.groupsControls.style.display = mode === 'groups' ? '' : 'none';
+    els.numbersControls.style.display = mode === 'numbers' ? '' : 'none';
+    els.printTitle.textContent = mode === 'groups' ? 'More & Less — Compare Groups' : 'More & Less — Compare Numbers';
+    if (!problems.length) newSet();
+    render();
+  }
+
+  function valueHtml(mode, p, side){
+    if (mode === 'groups'){
+      var qty = side === 'a' ? p.a : p.b;
+      var icon = side === 'a' ? p.iconA : p.iconB;
+      var icons = '';
+      for (var i = 0; i < qty; i++){ icons += '<span class="icon-item">' + icon + '</span>'; }
+      return '<div class="icon-row">' + icons + '</div>';
+    }
+    return '<div class="num">' + (side === 'a' ? p.a : p.b) + '</div>';
+  }
+
+  function render(){
+    var mode = currentMode();
+    els.scoreLine.hidden = true;
+    els.sheetBody.className = 'sheet';
+    els.contentWrap.innerHTML = '';
+
+    if (!problems.length){
+      els.contentWrap.innerHTML = '<div class="empty-state">Click "New set" to generate pairs to compare.</div>';
+      return;
+    }
+
+    var grid = document.createElement('div');
+    grid.className = 'compare-grid';
+    problems.forEach(function(p, idx){
+      var correct = symbolFor(p.a, p.b);
+      var card = document.createElement('div');
+      card.className = 'compare-card';
+      card.innerHTML =
+        '<div class="compare-value">' + valueHtml(mode, p, 'a') + '</div>' +
+        '<div class="symbol-picker" role="group" aria-label="Choose comparison symbol" data-idx="' + idx + '">' +
+          '<button type="button" data-sym="&lt;">&lt;</button>' +
+          '<button type="button" data-sym="=">=</button>' +
+          '<button type="button" data-sym="&gt;">&gt;</button>' +
+        '</div>' +
+        '<div class="print-blank-box"><span class="print-only-answer">' + correct + '</span></div>' +
+        '<div class="compare-value">' + valueHtml(mode, p, 'b') + '</div>';
+      var buttons = Array.prototype.slice.call(card.querySelectorAll('.symbol-picker button'));
+      buttons.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          buttons.forEach(function(b){ b.classList.remove('is-selected'); });
+          btn.classList.add('is-selected');
+          card.classList.remove('is-correct', 'is-incorrect');
+          els.scoreLine.hidden = true;
+        });
+      });
+      grid.appendChild(card);
+    });
+    els.contentWrap.appendChild(grid);
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var cards = Array.prototype.slice.call(els.contentWrap.querySelectorAll('.compare-card'));
+    var correctCount = 0;
+    cards.forEach(function(card, idx){
+      var selected = card.querySelector('.symbol-picker button.is-selected');
+      var ok = !!selected && selected.getAttribute('data-sym').replace('&lt;','<').replace('&gt;','>') === symbolFor(problems[idx].a, problems[idx].b);
+      card.classList.remove('is-correct', 'is-incorrect');
+      card.classList.add(ok ? 'is-correct' : 'is-incorrect');
+      if (ok) correctCount++;
+    });
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correctCount === cards.length
+      ? correctCount + ' out of ' + cards.length + ' correct — nicely compared! 🎉'
+      : correctCount + ' out of ' + cards.length + ' correct — keep practicing!';
+  });
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', switchMode); });
+  els.newBtn.addEventListener('click', function(){ newSet(); render(); });
+  els.maxGroup.addEventListener('change', function(){ if (currentMode()==='groups'){ newSet(); render(); } });
+  els.problemGroup.addEventListener('change', function(){ if (currentMode()==='groups'){ newSet(); render(); } });
+  els.maxNumber.addEventListener('change', function(){ if (currentMode()==='numbers'){ newSet(); render(); } });
+  els.problemNumber.addEventListener('change', function(){ if (currentMode()==='numbers'){ newSet(); render(); } });
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  switchMode();
+})();
+</script>

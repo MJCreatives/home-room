@@ -1,0 +1,447 @@
+<title>Shapes &amp; Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .shape-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+  .shape-chip{ position: relative; }
+  .shape-chip input{ position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .shape-chip label{
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    height: 68px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    cursor: pointer; transition: border-color .12s ease, background .12s ease; padding: 6px 4px;
+  }
+  .shape-chip svg{ width: 28px; height: 28px; }
+  .shape-chip .sc-name{ font-size: 10px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .shape-chip input:checked + label{ border-color: var(--accent); background: var(--accent-soft); }
+  .shape-chip input:checked + label svg{ color: var(--accent); }
+  .shape-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  /* ---------- Trace-shape section ---------- */
+  .shape-item-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+  .shape-item{ display: flex; flex-direction: column; align-items: center; gap: 10px; break-inside: avoid; }
+  .shape-item .item-svg-wrap{ width: 100%; max-width: 220px; aspect-ratio: 1; }
+  .shape-item .item-svg-wrap svg{ width: 100%; height: 100%; }
+  .shape-item .item-name{ font-family: "Fraunces", serif; font-weight: 600; font-size: 15px; color: var(--ink); }
+  .trace-outline{ fill: none; stroke: var(--ink-faint); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 8 7; }
+
+  /* ---------- Pattern section ---------- */
+  .pattern-row{ display: flex; align-items: center; gap: 10px; padding: 16px 0; border-top: 1px solid var(--border); flex-wrap: wrap; break-inside: avoid; }
+  .pattern-row:first-child{ border-top: none; }
+  .pattern-num{ font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); width: 22px; flex-shrink: 0; }
+  .pattern-item{
+    width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0; border: 1.5px solid var(--border); background: var(--surface-soft);
+  }
+  .pattern-item.is-blank{ border: 2px dashed var(--ink-faint); background: transparent; }
+  .pattern-item.is-answer{ display: none; }
+  body.printing-answers .pattern-item.is-blank{ display: none; }
+  body.printing-answers .pattern-item.is-answer{ display: flex; border-style: dashed; border-color: #B9E0CA; background: #E3F3EB; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Math</p>
+      <h1>Shapes &amp; Patterns 🔺</h1>
+      <p>Trace basic shapes, or figure out what comes next in a repeating pattern.</p>
+    </div>
+    <span class="badge" id="statusBadge">Trace shapes</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Shapes &amp; Patterns settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Activity</span>
+      <div class="seg" role="radiogroup" aria-label="Activity">
+        <input type="radio" name="mode" id="mode-shapes" value="shapes" checked>
+        <label for="mode-shapes">Trace shapes</label>
+        <input type="radio" name="mode" id="mode-patterns" value="patterns">
+        <label for="mode-patterns">Complete the pattern</label>
+      </div>
+    </div>
+
+    <div id="shapeControls">
+      <div class="field-group">
+        <span class="field-label">Shapes &mdash; click to select</span>
+        <div class="shape-grid" id="shapeGrid"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all</button>
+          <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear selection</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="patternControls" style="display:none;">
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="patternType" style="font-size:13.5px; cursor:default;">Pattern type:</label>
+          <select class="count-select" id="patternType">
+            <option value="AB">AB (red, blue, red, blue&hellip;)</option>
+            <option value="AAB">AAB (red, red, blue&hellip;)</option>
+            <option value="ABC" selected>ABC (red, blue, yellow&hellip;)</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="patternCount" style="font-size:13.5px; cursor:default;">How many rows:</label>
+          <select class="count-select" id="patternCount">
+            <option value="4">4</option>
+            <option value="6" selected>6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="printBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost no-print" id="printAnswersBtn" type="button" style="display:none;">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="body-section">
+    <div class="sheet" id="sheetBody">
+      <div class="print-title" id="printTitle">Shapes &amp; Patterns</div>
+      <div id="contentWrap"></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Pattern rows are generated fresh each time &mdash; hit "New set" for more.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var SHAPES = [
+    { key: "circle", name: "Circle", svg: '<circle class="trace-outline" cx="100" cy="100" r="70"/>' },
+    { key: "square", name: "Square", svg: '<rect class="trace-outline" x="35" y="35" width="130" height="130"/>' },
+    { key: "triangle", name: "Triangle", svg: '<polygon class="trace-outline" points="100,25 175,165 25,165"/>' },
+    { key: "star", name: "Star", svg: '<polygon class="trace-outline" points="100,25 117.6,75.7 171.3,76.8 128.5,109.3 144.1,160.7 100,130 55.9,160.7 71.5,109.3 28.7,76.8 82.4,75.7"/>' },
+    { key: "heart", name: "Heart", svg: '<path class="trace-outline" d="M100,170 C60,140 20,105 20,70 C20,40 45,20 70,20 C85,20 95,30 100,45 C105,30 115,20 130,20 C155,20 180,40 180,70 C180,105 140,140 100,170 Z"/>' },
+    { key: "diamond", name: "Diamond", svg: '<polygon class="trace-outline" points="100,20 175,100 100,180 25,100"/>' },
+    { key: "oval", name: "Oval", svg: '<ellipse class="trace-outline" cx="100" cy="100" rx="80" ry="55"/>' },
+    { key: "rectangle", name: "Rectangle", svg: '<rect class="trace-outline" x="20" y="55" width="160" height="90"/>' },
+    { key: "pentagon", name: "Pentagon", svg: '<polygon class="trace-outline" points="100,20 172,73 144,158 56,158 28,73"/>' },
+    { key: "hexagon", name: "Hexagon", svg: '<polygon class="trace-outline" points="100,20 165,58 165,142 100,180 35,142 35,58"/>' }
+  ];
+  var SHAPE_MAP = {};
+  SHAPES.forEach(function(s){ SHAPE_MAP[s.key] = s; });
+
+  var COLOR_ITEMS = [
+    { color: "#C1443A", label: "red" }, { color: "#2F6F8F", label: "blue" }, { color: "#D8A62C", label: "yellow" },
+    { color: "#2E7D5B", label: "green" }, { color: "#8A5FBF", label: "purple" }, { color: "#D97A3F", label: "orange" }
+  ];
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    shapeControls: document.getElementById('shapeControls'),
+    patternControls: document.getElementById('patternControls'),
+    shapeGrid: document.getElementById('shapeGrid'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    patternType: document.getElementById('patternType'),
+    patternCount: document.getElementById('patternCount'),
+    newBtn: document.getElementById('newBtn'),
+    printBtn: document.getElementById('printBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    printTitle: document.getElementById('printTitle'),
+    contentWrap: document.getElementById('contentWrap'),
+    sheetBody: document.getElementById('sheetBody')
+  };
+
+  var selectedShapes = [];
+  var patternRows = [];
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'shapes';
+  }
+
+  function buildShapeGrid(){
+    els.shapeGrid.innerHTML = '';
+    SHAPES.forEach(function(s, idx){
+      var wrap = document.createElement('div');
+      wrap.className = 'shape-chip';
+      var id = 'shape-' + idx;
+      wrap.innerHTML =
+        '<input type="checkbox" id="' + id + '" value="' + s.key + '">' +
+        '<label for="' + id + '"><svg viewBox="0 0 200 200" style="stroke:currentColor; fill:none; stroke-width:10;">' + s.svg.replace(/class="trace-outline"/g, '') + '</svg><span class="sc-name">' + s.name + '</span></label>';
+      els.shapeGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.shapeGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if (inp.checked){
+          if (selectedShapes.indexOf(inp.value) === -1) selectedShapes.push(inp.value);
+        } else {
+          selectedShapes = selectedShapes.filter(function(k){ return k !== inp.value; });
+        }
+        render();
+      });
+    });
+  }
+  function syncShapeChips(){
+    Array.prototype.slice.call(els.shapeGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.checked = selectedShapes.indexOf(inp.value) !== -1;
+    });
+  }
+  els.selectAllBtn.addEventListener('click', function(){ selectedShapes = SHAPES.map(function(s){ return s.key; }); render(); });
+  els.clearAllBtn.addEventListener('click', function(){ selectedShapes = []; render(); });
+
+  function buildPatternRow(type){
+    var t = type === 'mixed' ? ["AB","AAB","ABC"][Math.floor(Math.random()*3)] : type;
+    var colors = COLOR_ITEMS.slice();
+    for (var i = colors.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var tmp=colors[i]; colors[i]=colors[j]; colors[j]=tmp; }
+    var unit;
+    if (t === 'AB') unit = [colors[0], colors[1]];
+    else if (t === 'AAB') unit = [colors[0], colors[0], colors[1]];
+    else unit = [colors[0], colors[1], colors[2]];
+
+    var shown = 3; // full repeats shown before the blank
+    var sequence = [];
+    for (var r = 0; r < shown; r++){ sequence = sequence.concat(unit); }
+    var answer = unit[0];
+    return { sequence: sequence, answer: answer, type: t };
+  }
+
+  function newPatternSet(){
+    var type = els.patternType.value;
+    var n = parseInt(els.patternCount.value, 10);
+    patternRows = [];
+    for (var i = 0; i < n; i++){ patternRows.push(buildPatternRow(type)); }
+  }
+
+  function switchMode(){
+    var mode = currentMode();
+    els.statusBadge.textContent = mode === 'shapes' ? 'Trace shapes' : 'Complete the pattern';
+    els.shapeControls.style.display = mode === 'shapes' ? '' : 'none';
+    els.patternControls.style.display = mode === 'patterns' ? '' : 'none';
+    els.printAnswersBtn.style.display = mode === 'patterns' ? '' : 'none';
+    els.printTitle.textContent = mode === 'shapes' ? 'Shapes & Patterns — Shape Tracing' : 'Shapes & Patterns — Complete the Pattern';
+    if (mode === 'patterns' && !patternRows.length) newPatternSet();
+    render();
+  }
+
+  function render(){
+    var mode = currentMode();
+    els.sheetBody.className = 'sheet';
+    els.contentWrap.innerHTML = '';
+
+    if (mode === 'shapes'){
+      syncShapeChips();
+      if (!selectedShapes.length){
+        els.contentWrap.innerHTML = '<div class="empty-state">Select some shapes above to build a tracing sheet.</div>';
+        return;
+      }
+      var grid = document.createElement('div');
+      grid.className = 'shape-item-grid';
+      selectedShapes.forEach(function(key){
+        var s = SHAPE_MAP[key];
+        var item = document.createElement('div');
+        item.className = 'shape-item';
+        item.innerHTML = '<div class="item-svg-wrap"><svg viewBox="0 0 200 200">' + s.svg + '</svg></div><div class="item-name">' + s.name + '</div>';
+        grid.appendChild(item);
+      });
+      els.contentWrap.appendChild(grid);
+    } else {
+      if (!patternRows.length){
+        els.contentWrap.innerHTML = '<div class="empty-state">Click "New set" to generate pattern rows.</div>';
+        return;
+      }
+      patternRows.forEach(function(p, idx){
+        var row = document.createElement('div');
+        row.className = 'pattern-row';
+        var itemsHtml = '<span class="pattern-num">' + (idx+1) + '.</span>';
+        p.sequence.forEach(function(c){
+          itemsHtml += '<div class="pattern-item" style="background:' + c.color + '22; border-color:' + c.color + ';"><div style="width:22px;height:22px;border-radius:6px;background:' + c.color + ';"></div></div>';
+        });
+        itemsHtml += '<div class="pattern-item is-blank">?</div>';
+        itemsHtml += '<div class="pattern-item is-answer" style="background:' + p.answer.color + '22; border-color:' + p.answer.color + ';"><div style="width:22px;height:22px;border-radius:6px;background:' + p.answer.color + ';"></div></div>';
+        row.innerHTML = itemsHtml;
+        els.contentWrap.appendChild(row);
+      });
+    }
+  }
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', switchMode); });
+  els.newBtn.addEventListener('click', function(){
+    if (currentMode() === 'patterns'){ newPatternSet(); }
+    render();
+  });
+  els.patternType.addEventListener('change', newPatternSet);
+  els.patternCount.addEventListener('change', newPatternSet);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  buildShapeGrid();
+  selectedShapes = ["circle", "triangle", "star", "heart"];
+  switchMode();
+})();
+</script>
