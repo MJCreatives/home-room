@@ -1,0 +1,407 @@
+<title>Bonjour!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 52ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+  .print-id-line{ display: none; }
+
+  .word-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .word-card{
+    display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    border: 1.5px dashed var(--ink-faint); border-radius: 14px; padding: 20px 12px 16px; position: relative;
+    break-inside: avoid; transition: border-color .12s ease, background .12s ease;
+  }
+  .word-card.is-playing{ border-color: var(--accent); background: var(--accent-soft); }
+  .word-card .emoji{ font-size: 36px; line-height: 1; margin-bottom: 4px; }
+  .word-card .fr{ font-family: "Fraunces", serif; font-weight: 700; font-size: 19px; color: var(--ink); }
+  .word-card .en{ font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+  .word-card .hear-btn{
+    margin-top: 8px; border: 1.5px solid var(--border); background: var(--surface-soft); color: var(--ink-soft);
+    width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15px; transition: border-color .12s ease, color .12s ease;
+  }
+  .word-card .hear-btn:hover{ border-color: var(--accent); color: var(--accent); }
+  .word-card .hear-btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 4px; }
+    .print-id-line{ display: flex; gap: 28px; font-size: 13px; color: var(--ink-soft); margin: 0 0 22px; flex-wrap: wrap; }
+    .print-id-line .line{ display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 160px; }
+    .print-id-line .line span{ white-space: nowrap; }
+    .print-id-line .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+    .word-card{ border-color: var(--ink-faint) !important; background: #fff !important; }
+    .word-card .hear-btn{ display: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Life &amp; Extras</p>
+      <h1>Bonjour! 🥐</h1>
+      <p>Picture flashcards for first French words &mdash; tap the speaker to hear each one said aloud, or print a set to use offline.</p>
+    </div>
+    <span class="badge" id="statusBadge">Greetings</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Bonjour settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Category</span>
+      <div class="seg" role="radiogroup" aria-label="Category" id="categorySeg"></div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="playAllBtn" type="button">🔊 Play all</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="printBtn" type="button">Print flashcards</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2 id="sheetHeading">Greetings</h2>
+  </div>
+
+  <section class="word-section">
+    <div class="sheet">
+      <div class="print-title" id="printTitle">Bonjour! &mdash; French Vocabulary Flashcards</div>
+      <div class="print-id-line">
+        <div class="line"><span>Name</span><span class="rule"></span></div>
+        <div class="line"><span>Date</span><span class="rule"></span></div>
+      </div>
+      <div class="word-grid" id="wordGrid"></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Uses your browser's built-in text-to-speech &mdash; sound quality depends on the French voice installed on this device.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CATEGORIES = [
+    { key: "greetings", label: "Greetings", icon: "👋", words: [
+      { emoji: "👋", fr: "Bonjour", en: "Hello" },
+      { emoji: "🙋", fr: "Salut", en: "Hi" },
+      { emoji: "👋", fr: "Au revoir", en: "Goodbye" },
+      { emoji: "🙏", fr: "S'il te plaît", en: "Please" },
+      { emoji: "🙏", fr: "Merci", en: "Thank you" },
+      { emoji: "✅", fr: "Oui", en: "Yes" },
+      { emoji: "❌", fr: "Non", en: "No" },
+      { emoji: "❤️", fr: "Je t'aime", en: "I love you" }
+    ]},
+    { key: "colors", label: "Colors", icon: "🎨", words: [
+      { emoji: "🔴", fr: "Rouge", en: "Red" },
+      { emoji: "🔵", fr: "Bleu", en: "Blue" },
+      { emoji: "🟡", fr: "Jaune", en: "Yellow" },
+      { emoji: "🟢", fr: "Vert", en: "Green" },
+      { emoji: "⚪", fr: "Blanc", en: "White" },
+      { emoji: "⚫", fr: "Noir", en: "Black" },
+      { emoji: "🟠", fr: "Orange", en: "Orange" },
+      { emoji: "🟣", fr: "Violet", en: "Purple" },
+      { emoji: "🌸", fr: "Rose", en: "Pink" },
+      { emoji: "🟤", fr: "Marron", en: "Brown" }
+    ]},
+    { key: "numbers", label: "Numbers", icon: "🔢", words: [
+      { emoji: "1️⃣", fr: "Un", en: "One" },
+      { emoji: "2️⃣", fr: "Deux", en: "Two" },
+      { emoji: "3️⃣", fr: "Trois", en: "Three" },
+      { emoji: "4️⃣", fr: "Quatre", en: "Four" },
+      { emoji: "5️⃣", fr: "Cinq", en: "Five" },
+      { emoji: "6️⃣", fr: "Six", en: "Six" },
+      { emoji: "7️⃣", fr: "Sept", en: "Seven" },
+      { emoji: "8️⃣", fr: "Huit", en: "Eight" },
+      { emoji: "9️⃣", fr: "Neuf", en: "Nine" },
+      { emoji: "🔟", fr: "Dix", en: "Ten" }
+    ]},
+    { key: "animals", label: "Animals", icon: "🐾", words: [
+      { emoji: "🐶", fr: "Chien", en: "Dog" },
+      { emoji: "🐱", fr: "Chat", en: "Cat" },
+      { emoji: "🐦", fr: "Oiseau", en: "Bird" },
+      { emoji: "🐟", fr: "Poisson", en: "Fish" },
+      { emoji: "🐰", fr: "Lapin", en: "Rabbit" },
+      { emoji: "🐻", fr: "Ours", en: "Bear" },
+      { emoji: "🦁", fr: "Lion", en: "Lion" },
+      { emoji: "🐘", fr: "Éléphant", en: "Elephant" },
+      { emoji: "🐸", fr: "Grenouille", en: "Frog" },
+      { emoji: "🐴", fr: "Cheval", en: "Horse" }
+    ]},
+    { key: "family", label: "Family", icon: "👪", words: [
+      { emoji: "👩", fr: "Maman", en: "Mom" },
+      { emoji: "👨", fr: "Papa", en: "Dad" },
+      { emoji: "👧", fr: "Sœur", en: "Sister" },
+      { emoji: "👦", fr: "Frère", en: "Brother" },
+      { emoji: "👵", fr: "Grand-mère", en: "Grandma" },
+      { emoji: "👴", fr: "Grand-père", en: "Grandpa" },
+      { emoji: "👶", fr: "Bébé", en: "Baby" },
+      { emoji: "🏠", fr: "Famille", en: "Family" }
+    ]},
+    { key: "food", label: "Food & things", icon: "🍎", words: [
+      { emoji: "🍎", fr: "Pomme", en: "Apple" },
+      { emoji: "🍌", fr: "Banane", en: "Banana" },
+      { emoji: "🥖", fr: "Pain", en: "Bread" },
+      { emoji: "🧀", fr: "Fromage", en: "Cheese" },
+      { emoji: "🥛", fr: "Lait", en: "Milk" },
+      { emoji: "💧", fr: "Eau", en: "Water" },
+      { emoji: "⚽", fr: "Ballon", en: "Ball" },
+      { emoji: "📕", fr: "Livre", en: "Book" },
+      { emoji: "🛏️", fr: "Lit", en: "Bed" },
+      { emoji: "🚗", fr: "Voiture", en: "Car" }
+    ]}
+  ];
+
+  var els = {
+    categorySeg: document.getElementById('categorySeg'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetHeading: document.getElementById('sheetHeading'),
+    printTitle: document.getElementById('printTitle'),
+    wordGrid: document.getElementById('wordGrid'),
+    playAllBtn: document.getElementById('playAllBtn'),
+    printBtn: document.getElementById('printBtn')
+  };
+
+  var currentKey = CATEGORIES[0].key;
+  var playing = false;
+  var playToken = 0;
+
+  function currentCategory(){
+    return CATEGORIES.filter(function(c){ return c.key === currentKey; })[0];
+  }
+
+  function buildCategorySeg(){
+    els.categorySeg.innerHTML = '';
+    CATEGORIES.forEach(function(cat, idx){
+      var id = 'cat-' + cat.key;
+      var input = document.createElement('input');
+      input.type = 'radio'; input.name = 'category'; input.id = id; input.value = cat.key;
+      if (idx === 0) input.checked = true;
+      var label = document.createElement('label');
+      label.setAttribute('for', id);
+      label.innerHTML = cat.icon + ' ' + cat.label;
+      els.categorySeg.appendChild(input);
+      els.categorySeg.appendChild(label);
+      input.addEventListener('change', function(){
+        stopPlaying();
+        currentKey = cat.key;
+        render();
+      });
+    });
+  }
+
+  function speak(text, onend){
+    try {
+      if (!window.speechSynthesis){ if (onend) onend(); return; }
+      window.speechSynthesis.cancel();
+      var utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'fr-FR';
+      utter.rate = 0.82;
+      if (onend) utter.onend = onend;
+      window.speechSynthesis.speak(utter);
+    } catch(e){ if (onend) onend(); }
+  }
+
+  function stopPlaying(){
+    playing = false;
+    playToken++;
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){}
+    els.playAllBtn.textContent = '🔊 Play all';
+    Array.prototype.slice.call(els.wordGrid.querySelectorAll('.word-card')).forEach(function(c){
+      c.classList.remove('is-playing');
+    });
+  }
+
+  function render(){
+    var cat = currentCategory();
+    els.statusBadge.textContent = cat.label;
+    els.sheetHeading.textContent = cat.label;
+    els.printTitle.textContent = 'Bonjour! — French Vocabulary: ' + cat.label;
+
+    els.wordGrid.innerHTML = '';
+    cat.words.forEach(function(w, idx){
+      var card = document.createElement('div');
+      card.className = 'word-card';
+      card.dataset.idx = idx;
+      card.innerHTML =
+        '<span class="emoji">' + w.emoji + '</span>' +
+        '<span class="fr">' + w.fr + '</span>' +
+        '<span class="en">' + w.en + '</span>' +
+        '<button class="hear-btn no-print" type="button" aria-label="Hear ' + w.fr + '">🔊</button>';
+      card.querySelector('.hear-btn').addEventListener('click', function(){
+        stopPlaying();
+        speak(w.fr);
+      });
+      els.wordGrid.appendChild(card);
+    });
+  }
+
+  els.playAllBtn.addEventListener('click', function(){
+    if (playing){ stopPlaying(); return; }
+    var cat = currentCategory();
+    var cards = Array.prototype.slice.call(els.wordGrid.querySelectorAll('.word-card'));
+    playing = true;
+    var myToken = ++playToken;
+    els.playAllBtn.textContent = '⏹ Stop';
+
+    function step(idx){
+      if (!playing || myToken !== playToken) return;
+      cards.forEach(function(c){ c.classList.remove('is-playing'); });
+      if (idx >= cat.words.length){
+        stopPlaying();
+        return;
+      }
+      cards[idx].classList.add('is-playing');
+      speak(cat.words[idx].fr, function(){
+        setTimeout(function(){ step(idx + 1); }, 450);
+      });
+    }
+    step(0);
+  });
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(){
+    stopPlaying();
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){ window.print(); return; }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body>' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', printInNewWindow);
+
+  buildCategorySeg();
+  render();
+})();
+</script>
