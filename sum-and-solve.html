@@ -687,6 +687,7 @@
 
   var OP_LABELS = { add: "Addition", sub: "Subtraction", mul: "Multiplication", div: "Division" };
   var OP_SYMBOL = { add: "+", sub: "−", mul: "×", div: "÷" };
+  var currentProblems = [];
 
   var els = {
     opInputs: Array.prototype.slice.call(document.querySelectorAll('.op-chip input')),
@@ -823,7 +824,9 @@
     });
   }
 
-  function renderAnswers(problems){
+  function renderAnswers(problems, textSize){
+    els.answerGrid.classList.toggle('size-large', textSize === 'large');
+    els.answerGrid.classList.toggle('size-xl', textSize === 'xl');
     els.answerGrid.innerHTML = '';
     problems.forEach(function(p, idx){
       var row = document.createElement('div');
@@ -850,17 +853,18 @@
     if (!ops.length){
       els.opError.hidden = false;
       els.generateBtn.disabled = true;
+      currentProblems = [];
       renderWorksheet([], layout, textSize);
-      renderAnswers([]);
+      renderAnswers([], textSize);
       els.statusBadge.textContent = 'No operations selected';
       return;
     }
     els.opError.hidden = true;
     els.generateBtn.disabled = false;
 
-    var problems = buildProblems(ops, diff, count);
-    renderWorksheet(problems, layout, textSize);
-    renderAnswers(problems);
+    currentProblems = buildProblems(ops, diff, count);
+    renderWorksheet(currentProblems, layout, textSize);
+    renderAnswers(currentProblems, textSize);
 
     var diffLabel = diff.charAt(0).toUpperCase() + diff.slice(1);
     var metaText = diffLabel + ' · ' + opsLabel(ops);
@@ -868,6 +872,13 @@
     els.answerMeta.textContent = metaText;
     els.diffHint.textContent = DIFFICULTY_HINTS[diff];
     els.statusBadge.textContent = count + ' problems ready';
+  }
+
+  function redraw(){
+    var layout = currentLayout();
+    var textSize = currentTextSize();
+    renderWorksheet(currentProblems, layout, textSize);
+    renderAnswers(currentProblems, textSize);
   }
 
   function printInNewWindow(bodyClass){
@@ -924,6 +935,8 @@
       if (currentOps().length){ els.opError.hidden = true; els.generateBtn.disabled = false; }
     });
   });
+  els.layoutInputs.forEach(function(i){ i.addEventListener('change', redraw); });
+  els.sizeInputs.forEach(function(i){ i.addEventListener('change', redraw); });
 
   els.diffHint.textContent = DIFFICULTY_HINTS[currentDifficulty()];
   generate();
