@@ -133,6 +133,7 @@
     box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
   }
   .print-title{ display: none; }
+  .print-id-line{ display: none; }
   .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
 
   /* ---------- Trace-shape section ---------- */
@@ -164,7 +165,16 @@
     .wrap{ max-width: none; padding: 0; margin: 0; }
     .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
     .sheet-toolbar{ display: none !important; }
-    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 4px; }
+    .print-id-line{ display: flex; gap: 28px; font-size: 13px; color: var(--ink-soft); margin: 0 0 20px; flex-wrap: wrap; }
+    .print-id-line .line{ display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 160px; }
+    .print-id-line .line span{ white-space: nowrap; }
+    .print-id-line .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+    .pattern-item, .pattern-item *{
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
   }
 </style>
 
@@ -208,6 +218,14 @@
     <div id="patternControls" style="display:none;">
       <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
         <div style="display:flex; align-items:center; gap:8px;">
+          <label for="patternElement" style="font-size:13.5px; cursor:default;">Pattern uses:</label>
+          <select class="count-select" id="patternElement">
+            <option value="colors" selected>Colors</option>
+            <option value="shapes">Shapes</option>
+            <option value="both">Shapes &amp; colors (harder)</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
           <label for="patternType" style="font-size:13.5px; cursor:default;">Pattern type:</label>
           <select class="count-select" id="patternType">
             <option value="AB">AB (red, blue, red, blue&hellip;)</option>
@@ -243,6 +261,10 @@
   <section class="body-section">
     <div class="sheet" id="sheetBody">
       <div class="print-title" id="printTitle">Shapes &amp; Patterns</div>
+      <div class="print-id-line">
+        <div class="line"><span>Name</span><span class="rule"></span></div>
+        <div class="line"><span>Date</span><span class="rule"></span></div>
+      </div>
       <div id="contentWrap"></div>
     </div>
   </section>
@@ -274,6 +296,49 @@
     { color: "#2E7D5B", label: "green" }, { color: "#8A5FBF", label: "purple" }, { color: "#D97A3F", label: "orange" }
   ];
 
+  var PATTERN_SHAPES = [
+    { key: "circle", fill: '<circle cx="100" cy="100" r="78"/>' },
+    { key: "square", fill: '<rect x="28" y="28" width="144" height="144" rx="18"/>' },
+    { key: "triangle", fill: '<polygon points="100,22 178,168 22,168"/>' },
+    { key: "star", fill: '<polygon points="100,15 122.5,70.5 182,72.5 135,111 151,168 100,134 49,168 65,111 18,72.5 77.5,70.5"/>' },
+    { key: "diamond", fill: '<polygon points="100,18 178,100 100,182 22,100"/>' },
+    { key: "heart", fill: '<path d="M100,175 C55,142 15,105 15,68 C15,38 40,18 66,18 C82,18 93,28 100,44 C107,28 118,18 134,18 C160,18 185,38 185,68 C185,105 145,142 100,175 Z"/>' }
+  ];
+
+  function shuffled(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+    return a;
+  }
+
+  function buildItemPool(elementMode){
+    if (elementMode === 'shapes'){
+      return shuffled(PATTERN_SHAPES).map(function(s){ return { shape: s }; });
+    }
+    if (elementMode === 'both'){
+      var shapes = shuffled(PATTERN_SHAPES);
+      var colors = shuffled(COLOR_ITEMS);
+      var n = Math.min(shapes.length, colors.length);
+      var out = [];
+      for (var i = 0; i < n; i++){ out.push({ shape: shapes[i], color: colors[i].color }); }
+      return out;
+    }
+    return shuffled(COLOR_ITEMS).map(function(c){ return { color: c.color }; });
+  }
+
+  function patternItemMarkup(item, extraClass){
+    var cls = 'pattern-item' + (extraClass ? ' ' + extraClass : '');
+    if (item.shape && item.color){
+      return '<div class="' + cls + '" style="background:' + item.color + '22; border-color:' + item.color + ';">' +
+        '<svg viewBox="0 0 200 200" style="width:26px;height:26px;color:' + item.color + ';" fill="currentColor">' + item.shape.fill + '</svg></div>';
+    }
+    if (item.shape){
+      return '<div class="' + cls + '"><svg viewBox="0 0 200 200" style="width:26px;height:26px;color:var(--ink);" fill="currentColor">' + item.shape.fill + '</svg></div>';
+    }
+    return '<div class="' + cls + '" style="background:' + item.color + '22; border-color:' + item.color + ';">' +
+      '<div style="width:22px;height:22px;border-radius:6px;background:' + item.color + ';"></div></div>';
+  }
+
   var els = {
     modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
     shapeControls: document.getElementById('shapeControls'),
@@ -281,6 +346,7 @@
     shapeGrid: document.getElementById('shapeGrid'),
     selectAllBtn: document.getElementById('selectAllBtn'),
     clearAllBtn: document.getElementById('clearAllBtn'),
+    patternElement: document.getElementById('patternElement'),
     patternType: document.getElementById('patternType'),
     patternCount: document.getElementById('patternCount'),
     newBtn: document.getElementById('newBtn'),
@@ -330,14 +396,13 @@
   els.selectAllBtn.addEventListener('click', function(){ selectedShapes = SHAPES.map(function(s){ return s.key; }); render(); });
   els.clearAllBtn.addEventListener('click', function(){ selectedShapes = []; render(); });
 
-  function buildPatternRow(type){
+  function buildPatternRow(type, elementMode){
     var t = type === 'mixed' ? ["AB","AAB","ABC"][Math.floor(Math.random()*3)] : type;
-    var colors = COLOR_ITEMS.slice();
-    for (var i = colors.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i+1)); var tmp=colors[i]; colors[i]=colors[j]; colors[j]=tmp; }
+    var pool = buildItemPool(elementMode);
     var unit;
-    if (t === 'AB') unit = [colors[0], colors[1]];
-    else if (t === 'AAB') unit = [colors[0], colors[0], colors[1]];
-    else unit = [colors[0], colors[1], colors[2]];
+    if (t === 'AB') unit = [pool[0], pool[1]];
+    else if (t === 'AAB') unit = [pool[0], pool[0], pool[1]];
+    else unit = [pool[0], pool[1], pool[2]];
 
     var shown = 3; // full repeats shown before the blank
     var sequence = [];
@@ -348,9 +413,10 @@
 
   function newPatternSet(){
     var type = els.patternType.value;
+    var elementMode = els.patternElement.value;
     var n = parseInt(els.patternCount.value, 10);
     patternRows = [];
-    for (var i = 0; i < n; i++){ patternRows.push(buildPatternRow(type)); }
+    for (var i = 0; i < n; i++){ patternRows.push(buildPatternRow(type, elementMode)); }
   }
 
   function switchMode(){
@@ -394,11 +460,11 @@
         var row = document.createElement('div');
         row.className = 'pattern-row';
         var itemsHtml = '<span class="pattern-num">' + (idx+1) + '.</span>';
-        p.sequence.forEach(function(c){
-          itemsHtml += '<div class="pattern-item" style="background:' + c.color + '22; border-color:' + c.color + ';"><div style="width:22px;height:22px;border-radius:6px;background:' + c.color + ';"></div></div>';
+        p.sequence.forEach(function(item){
+          itemsHtml += patternItemMarkup(item);
         });
         itemsHtml += '<div class="pattern-item is-blank">?</div>';
-        itemsHtml += '<div class="pattern-item is-answer" style="background:' + p.answer.color + '22; border-color:' + p.answer.color + ';"><div style="width:22px;height:22px;border-radius:6px;background:' + p.answer.color + ';"></div></div>';
+        itemsHtml += patternItemMarkup(p.answer, 'is-answer');
         row.innerHTML = itemsHtml;
         els.contentWrap.appendChild(row);
       });
@@ -410,8 +476,10 @@
     if (currentMode() === 'patterns'){ newPatternSet(); }
     render();
   });
-  els.patternType.addEventListener('change', newPatternSet);
-  els.patternCount.addEventListener('change', newPatternSet);
+  function redrawPatterns(){ newPatternSet(); render(); }
+  els.patternElement.addEventListener('change', redrawPatterns);
+  els.patternType.addEventListener('change', redrawPatterns);
+  els.patternCount.addEventListener('change', redrawPatterns);
 
   /* ---------- Print ---------- */
   function printInNewWindow(bodyClass){
