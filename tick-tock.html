@@ -160,6 +160,15 @@
   .clock-face-svg .hand-hour{ stroke: var(--ink); stroke-width: 6; stroke-linecap: round; }
   .clock-face-svg .hand-minute{ stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
   .clock-face-svg .hub{ fill: var(--ink); }
+  .clock-face-svg.interactive{ cursor: grab; touch-action: none; }
+  .clock-face-svg.interactive:active{ cursor: grabbing; }
+  .clock-face-svg.interactive .hand-draw{ stroke: var(--accent); }
+
+  .draw-prompt{
+    font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 700;
+    color: var(--ink); text-align: center;
+  }
+  .draw-prompt strong{ color: var(--accent); }
 
   /* Digit answer boxes */
   .digit-answer{ display: flex; align-items: center; gap: 6px; }
@@ -207,6 +216,10 @@
     body.printing-answers .blank-line{ display: none !important; }
     body.printing-answers .key-value{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 17px; color: var(--good); text-align: center; }
     body:not(.printing-answers) .key-value{ display: none !important; }
+
+    .draw-face-answer{ display: none; }
+    body.printing-answers .draw-face-blank{ display: none !important; }
+    body.printing-answers .draw-face-answer{ display: block !important; }
   }
 </style>
 
@@ -218,7 +231,7 @@
     <div>
       <p class="eyebrow">Math</p>
       <h1>Tick Tock 🕐</h1>
-      <p>Random analog clocks to read &mdash; write the digital time, or say it in words like "half past 3" or "quarter to 1."</p>
+      <p>Random analog clocks to read &mdash; write the digital time, say it in words, or flip it around and draw the hands yourself.</p>
     </div>
     <span class="badge" id="statusBadge">Write the digits</span>
   </header>
@@ -233,6 +246,8 @@
         <label for="mode-digits">Write the digits</label>
         <input type="radio" name="mode" id="mode-words" value="words">
         <label for="mode-words">Say it in words</label>
+        <input type="radio" name="mode" id="mode-draw" value="draw">
+        <label for="mode-draw">Draw the hands</label>
       </div>
     </div>
 
@@ -283,6 +298,8 @@
           <div class="line"><span>Date</span><span class="rule"></span></div>
         </div>
       </div>
+
+      <p class="diff-hint no-print" id="drawHint" style="display:none; margin:0 0 16px;">🖱️ Click and drag a clock hand to set the time on screen. On a printed worksheet, she draws the hands in with a pencil instead.</p>
 
       <div class="clock-grid" id="clockGrid"></div>
 
@@ -338,10 +355,14 @@
     statusBadge: document.getElementById('statusBadge'),
     sheetMeta: document.getElementById('sheetMeta'),
     clockGrid: document.getElementById('clockGrid'),
-    scoreLine: document.getElementById('scoreLine')
+    scoreLine: document.getElementById('scoreLine'),
+    drawHint: document.getElementById('drawHint')
   };
 
   var clocks = []; // { hour, minute, wordAnswers: [...] }
+  var drawStates = []; // { hourAngle, minuteAngle } per card, for "Draw the hands" mode
+  var lastGranularity = '5';
+  var MODE_LABEL = { digits: 'Write the digits', words: 'Say it in words', draw: 'Draw the hands' };
 
   function currentMode(){
     var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
@@ -357,8 +378,9 @@
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   }
 
-  function clockSvg(hour, minute){
-    var cx = 100, cy = 100, faceR = 92;
+  var HAND_HOUR_LEN = 46, HAND_MINUTE_LEN = 70;
+
+  function faceParts(cx, cy, faceR){
     var parts = [];
     parts.push('<circle class="face" cx="' + cx + '" cy="' + cy + '" r="' + faceR + '"></circle>');
 
@@ -375,17 +397,49 @@
       var pos = polar(cx, cy, faceR - 28, na);
       parts.push('<text class="numeral" x="' + pos.x.toFixed(1) + '" y="' + pos.y.toFixed(1) + '">' + n + '</text>');
     }
+    return parts;
+  }
+
+  function clockSvg(hour, minute){
+    var cx = 100, cy = 100, faceR = 92;
+    var parts = faceParts(cx, cy, faceR);
 
     var hourAngle = (hour % 12 + minute / 60) * 30;
     var minuteAngle = minute * 6;
-    var hourEnd = polar(cx, cy, 46, hourAngle);
-    var minuteEnd = polar(cx, cy, 70, minuteAngle);
+    var hourEnd = polar(cx, cy, HAND_HOUR_LEN, hourAngle);
+    var minuteEnd = polar(cx, cy, HAND_MINUTE_LEN, minuteAngle);
 
     parts.push('<line class="hand-hour" x1="' + cx + '" y1="' + cy + '" x2="' + hourEnd.x.toFixed(1) + '" y2="' + hourEnd.y.toFixed(1) + '"></line>');
     parts.push('<line class="hand-minute" x1="' + cx + '" y1="' + cy + '" x2="' + minuteEnd.x.toFixed(1) + '" y2="' + minuteEnd.y.toFixed(1) + '"></line>');
     parts.push('<circle class="hub" cx="' + cx + '" cy="' + cy + '" r="5"></circle>');
 
     return '<svg class="clock-face-svg" viewBox="0 0 200 200" aria-hidden="true">' + parts.join('') + '</svg>';
+  }
+
+  function blankFaceSvg(){
+    var cx = 100, cy = 100, faceR = 92;
+    var parts = faceParts(cx, cy, faceR);
+    parts.push('<circle class="hub" cx="' + cx + '" cy="' + cy + '" r="5"></circle>');
+    return '<svg class="clock-face-svg" viewBox="0 0 200 200" aria-hidden="true">' + parts.join('') + '</svg>';
+  }
+
+  function interactiveClockSvg(idx){
+    var cx = 100, cy = 100, faceR = 92;
+    var state = drawStates[idx] || (drawStates[idx] = { hourAngle: 0, minuteAngle: 0 });
+    var parts = faceParts(cx, cy, faceR);
+    var hourEnd = polar(cx, cy, HAND_HOUR_LEN, state.hourAngle);
+    var minuteEnd = polar(cx, cy, HAND_MINUTE_LEN, state.minuteAngle);
+    parts.push('<line class="hand-hour hand-draw" data-hand="hour" x1="' + cx + '" y1="' + cy + '" x2="' + hourEnd.x.toFixed(1) + '" y2="' + hourEnd.y.toFixed(1) + '"></line>');
+    parts.push('<line class="hand-minute hand-draw" data-hand="minute" x1="' + cx + '" y1="' + cy + '" x2="' + minuteEnd.x.toFixed(1) + '" y2="' + minuteEnd.y.toFixed(1) + '"></line>');
+    parts.push('<circle class="hub" cx="' + cx + '" cy="' + cy + '" r="5"></circle>');
+    return '<svg class="clock-face-svg interactive" data-idx="' + idx + '" viewBox="0 0 200 200" role="img" aria-label="Drag the hands to set the time">' + parts.join('') + '</svg>';
+  }
+
+  function snapAngle(angle, step){
+    var steps = 360 / step;
+    var idx = Math.round(angle / step) % steps;
+    if (idx < 0) idx += steps;
+    return idx * step;
   }
 
   function randomClock(granularity){
@@ -401,11 +455,83 @@
 
   function nearestFive(m){ return Math.round(m / 5) * 5 % 60; }
 
+  function wireDragHands(card, idx, granularity){
+    var svgEl = card.querySelector('.clock-face-svg.interactive');
+    if (!svgEl) return;
+    var hourLine = svgEl.querySelector('[data-hand="hour"]');
+    var minuteLine = svgEl.querySelector('[data-hand="minute"]');
+    var minStep = granularity === '5' ? 30 : 6;
+    var dragHand = null;
+    var pointerId = null;
+
+    function updateLine(hand, angle){
+      var len = hand === 'hour' ? HAND_HOUR_LEN : HAND_MINUTE_LEN;
+      var end = polar(100, 100, len, angle);
+      var line = hand === 'hour' ? hourLine : minuteLine;
+      line.setAttribute('x2', end.x.toFixed(1));
+      line.setAttribute('y2', end.y.toFixed(1));
+    }
+
+    function pointInfo(evt){
+      var rect = svgEl.getBoundingClientRect();
+      var scale = 200 / rect.width;
+      var x = (evt.clientX - rect.left) * scale;
+      var y = (evt.clientY - rect.top) * scale;
+      var dx = x - 100, dy = y - 100;
+      var r = Math.sqrt(dx * dx + dy * dy);
+      var deg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      deg = (deg % 360 + 360) % 360;
+      return { angle: deg, r: r };
+    }
+
+    function clearFeedback(){
+      card.classList.remove('is-correct', 'is-incorrect');
+      els.scoreLine.hidden = true;
+    }
+
+    svgEl.addEventListener('pointerdown', function(evt){
+      var pt = pointInfo(evt);
+      if (pt.r <= (HAND_HOUR_LEN + HAND_MINUTE_LEN) / 2) dragHand = 'hour';
+      else if (pt.r <= 92) dragHand = 'minute';
+      else { dragHand = null; return; }
+      pointerId = evt.pointerId;
+      try { svgEl.setPointerCapture(pointerId); } catch(e){}
+      var step = dragHand === 'hour' ? 30 : minStep;
+      var snapped = snapAngle(pt.angle, step);
+      drawStates[idx][dragHand + 'Angle'] = snapped;
+      updateLine(dragHand, snapped);
+      clearFeedback();
+      evt.preventDefault();
+    });
+
+    svgEl.addEventListener('pointermove', function(evt){
+      if (!dragHand) return;
+      var pt = pointInfo(evt);
+      var step = dragHand === 'hour' ? 30 : minStep;
+      var snapped = snapAngle(pt.angle, step);
+      drawStates[idx][dragHand + 'Angle'] = snapped;
+      updateLine(dragHand, snapped);
+      evt.preventDefault();
+    });
+
+    function endDrag(){
+      if (dragHand && pointerId != null){
+        try { svgEl.releasePointerCapture(pointerId); } catch(e){}
+      }
+      dragHand = null;
+      pointerId = null;
+    }
+    svgEl.addEventListener('pointerup', endDrag);
+    svgEl.addEventListener('pointercancel', endDrag);
+  }
+
   function generate(){
     var mode = currentMode();
     var granularity = mode === 'words' ? '5' : currentGranularity();
+    lastGranularity = granularity;
     var count = parseInt(els.countSelect.value, 10);
     clocks = [];
+    drawStates = [];
     for (var i = 0; i < count; i++){
       clocks.push(randomClock(granularity));
     }
@@ -413,10 +539,11 @@
   }
 
   function render(mode, granularity){
-    els.statusBadge.textContent = mode === 'digits' ? 'Write the digits' : 'Say it in words';
+    els.statusBadge.textContent = MODE_LABEL[mode];
     els.granularityGroup.style.display = mode === 'words' ? 'none' : '';
     els.granularityHint.innerHTML = GRAN_HINT[granularity];
-    els.sheetMeta.textContent = (mode === 'digits' ? 'Write the digits' : 'Say it in words') + ' · ' + (mode === 'words' ? '5-minute marks' : (granularity === '5' ? '5-minute marks' : 'any minute'));
+    els.sheetMeta.textContent = MODE_LABEL[mode] + ' · ' + (mode === 'words' ? '5-minute marks' : (granularity === '5' ? '5-minute marks' : 'any minute'));
+    els.drawHint.style.display = mode === 'draw' ? '' : 'none';
 
     els.clockGrid.innerHTML = '';
     clocks.forEach(function(c, idx){
@@ -424,12 +551,12 @@
       card.className = 'clock-card';
       card.dataset.index = idx;
 
-      var svg = clockSvg(c.hour, c.minute);
-
+      var svg;
       var answerHtml = '';
       var printHtml = '';
 
       if (mode === 'digits'){
+        svg = clockSvg(c.hour, c.minute);
         var hhVal = c.hour;
         var mmVal = pad2(c.minute);
         answerHtml =
@@ -443,7 +570,15 @@
             '<div class="blank-boxes"><span class="blank-box"></span><span class="blank-colon">:</span><span class="blank-box"></span></div>' +
             '<div class="key-value">' + hhVal + ':' + mmVal + '</div>' +
           '</div>';
+      } else if (mode === 'draw'){
+        svg = '<div class="no-print">' + interactiveClockSvg(idx) + '</div>';
+        answerHtml =
+          '<div class="draw-prompt">Set the time to <strong>' + c.hour + ':' + pad2(c.minute) + '</strong></div>';
+        printHtml =
+          '<div class="print-only draw-face-blank">' + blankFaceSvg() + '</div>' +
+          '<div class="print-only draw-face-answer">' + clockSvg(c.hour, c.minute) + '</div>';
       } else {
+        svg = clockSvg(c.hour, c.minute);
         var phrases = WORD_TEMPLATES[c.minute](c.hour);
         answerHtml =
           '<div class="word-answer">' +
@@ -463,6 +598,10 @@
         printHtml;
 
       els.clockGrid.appendChild(card);
+
+      if (mode === 'draw'){
+        wireDragHands(card, idx, granularity);
+      }
     });
 
     els.scoreLine.hidden = true;
@@ -491,6 +630,16 @@
         var hh = card.querySelector('.hh').value.trim();
         var mm = card.querySelector('.mm').value.trim();
         ok = hh !== '' && mm !== '' && parseInt(hh, 10) === c.hour && parseInt(mm, 10) === c.minute;
+      } else if (mode === 'draw'){
+        var state = drawStates[idx] || { hourAngle: 0, minuteAngle: 0 };
+        var hourIdx = Math.round(state.hourAngle / 30) % 12;
+        var gotHour = hourIdx === 0 ? 12 : hourIdx;
+        var minStep = lastGranularity === '5' ? 30 : 6;
+        var minMultiplier = lastGranularity === '5' ? 5 : 1;
+        var minStepsCount = 360 / minStep;
+        var minIdx = Math.round(state.minuteAngle / minStep) % minStepsCount;
+        var gotMinute = minIdx * minMultiplier;
+        ok = gotHour === c.hour && gotMinute === c.minute;
       } else {
         var val = normalize(card.querySelector('.word-input').value || '');
         var phrases = WORD_TEMPLATES[c.minute](c.hour);
