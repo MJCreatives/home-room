@@ -391,6 +391,9 @@
     width: 100%;
     height: auto;
   }
+  .row-svg-wrap svg + svg{
+    margin-top: 6px;
+  }
 
   .empty-state{
     text-align: center;
@@ -484,6 +487,14 @@
         <option value="5">5 faded traces</option>
         <option value="6">6 faded traces</option>
       </select>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Practice</span>
+      <div class="check-row">
+        <input type="checkbox" id="blankLine" checked>
+        <label for="blankLine">Add a blank line under each row to practice without tracing</label>
+      </div>
     </div>
 
     <div class="actions-row">
@@ -591,6 +602,7 @@
     quickWordBtn: document.getElementById('quickWordBtn'),
     letterGrid: document.getElementById('letterGrid'),
     showArrows: document.getElementById('showArrows'),
+    blankLine: document.getElementById('blankLine'),
     selectAllBtn: document.getElementById('selectAllBtn'),
     clearAllBtn: document.getElementById('clearAllBtn'),
     repeatSelect: document.getElementById('repeatSelect'),
@@ -691,11 +703,28 @@
     return parts.join('');
   }
 
+  function buildBlankLineSVG(repeats){
+    // a fully blank practice line (no letters at all) matching the width of the traced row above,
+    // so kids can write the letter on their own after tracing it.
+    var totalSlots = 1 + repeats + BLANK_SLOTS;
+    var width = totalSlots * SLOT;
+    var height = 145;
+    var parts = [];
+    parts.push('<svg viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Blank practice line">');
+    parts.push('<line x1="0" y1="' + TOP + '" x2="' + width + '" y2="' + TOP + '" stroke="var(--guide-line)" stroke-width="1"></line>');
+    parts.push('<line x1="0" y1="' + MID + '" x2="' + width + '" y2="' + MID + '" stroke="var(--guide-line)" stroke-width="1" stroke-dasharray="3 4"></line>');
+    parts.push('<line x1="0" y1="' + BASE + '" x2="' + width + '" y2="' + BASE + '" stroke="var(--ink-soft)" stroke-width="1.75"></line>');
+    parts.push('<line x1="0" y1="' + DESC + '" x2="' + width + '" y2="' + DESC + '" stroke="var(--guide-line)" stroke-width="1"></line>');
+    parts.push('</svg>');
+    return parts.join('');
+  }
+
   function render(){
     syncChipStates();
     var caseMode = currentCase();
     var repeats = parseInt(els.repeatSelect.value, 10);
     var showArrows = els.showArrows.checked;
+    var blankLine = els.blankLine.checked;
 
     els.practiceRows.innerHTML = '';
     if (!sequence.length){
@@ -707,7 +736,7 @@
         var displayLetter = caseMode === 'upper' ? letter : letter.toLowerCase();
         row.innerHTML =
           '<div class="row-label"><span class="row-num">' + (idx + 1) + '</span><span class="row-letter">' + displayLetter + '</span></div>' +
-          '<div class="row-svg-wrap">' + buildRowSVG(letter, caseMode, repeats, showArrows) + '</div>';
+          '<div class="row-svg-wrap">' + buildRowSVG(letter, caseMode, repeats, showArrows) + (blankLine ? buildBlankLineSVG(repeats) : '') + '</div>';
         els.practiceRows.appendChild(row);
       });
     }
@@ -716,14 +745,15 @@
     var listLabel = sequence.length ? sequence.join(', ') : 'none selected';
     els.sheetMeta.textContent = caseLabel + ' · ' + listLabel;
     els.statusBadge.textContent = sequence.length + ' letter' + (sequence.length === 1 ? '' : 's') + ' selected';
-    els.sheetFootnote.textContent = showArrows
-      ? 'Numbers show stroke order, arrows show direction. Trace the faded letters, then write it on your own on the blank line.'
-      : 'Trace the faded letters, then write it on your own on the blank line.';
+    var arrowsNote = showArrows ? 'Numbers show stroke order, arrows show direction. ' : '';
+    var practiceNote = blankLine ? 'Trace the faded letters, then write it on your own on the blank line.' : 'Trace the faded letters to practice.';
+    els.sheetFootnote.textContent = arrowsNote + practiceNote;
   }
 
   els.caseInputs.forEach(function(i){ i.addEventListener('change', render); });
   els.repeatSelect.addEventListener('change', render);
   els.showArrows.addEventListener('change', render);
+  els.blankLine.addEventListener('change', render);
 
   els.quickWordBtn.addEventListener('click', function(){
     var raw = els.quickWord.value || '';
