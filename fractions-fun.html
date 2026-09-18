@@ -1,0 +1,627 @@
+<title>Fractions Fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+    --good: #2E7D5B; --good-soft: #E3F3EB; --good-border: #B9E0CA;
+    --bad: #C1443A; --bad-soft: #F7E1DE; --bad-border: #EBC0BA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+      --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+      --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+    --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+    --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .diff-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+  select.count-select:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .controls-row{ display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Sheet ---------- */
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 40px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .sheet-head{
+    display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 26px; gap: 20px; flex-wrap: wrap;
+  }
+  .sheet-head .title-block h3{ font-family: "Fraunces", serif; font-size: 22px; margin: 0 0 4px; }
+  .sheet-head .title-block .meta{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .id-lines{ display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-soft); min-width: 200px; }
+  .id-lines .line{ display: flex; align-items: baseline; gap: 8px; }
+  .id-lines .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+  .frac-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
+  .frac-grid.is-compare{ grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+  .frac-card{
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    border: 1.5px solid var(--border); border-radius: 14px; padding: 18px 14px 20px;
+    background: var(--surface-soft); break-inside: avoid;
+  }
+  .frac-card.compare-card{ flex-direction: row; justify-content: center; flex-wrap: wrap; }
+  .frac-card .num-badge{
+    align-self: flex-start; font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    color: var(--ink-faint); font-weight: 600;
+  }
+  .frac-card.is-correct{ border-color: var(--good-border); background: var(--good-soft); }
+  .frac-card.is-incorrect{ border-color: var(--bad-border); background: var(--bad-soft); }
+
+  .frac-svg{ width: 130px; height: 130px; }
+  .frac-svg.interactive{ cursor: pointer; }
+  .pie-slice{ fill: var(--surface); stroke: var(--ink); stroke-width: 2.5; }
+  .pie-slice.is-shaded{ fill: var(--accent); }
+  .bar-seg{ fill: var(--surface); stroke: var(--ink); stroke-width: 2.5; }
+  .bar-seg.is-shaded{ fill: var(--accent); }
+
+  .compare-shape{ display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .compare-shape .frac-svg{ width: 90px; height: 90px; }
+
+  /* Fraction answer boxes ("name the fraction") */
+  .frac-answer{ display: flex; align-items: center; gap: 6px; }
+  .frac-answer .frac-input{
+    width: 42px; height: 42px; text-align: center; font-family: "IBM Plex Mono", monospace;
+    font-size: 18px; font-weight: 700; color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 0;
+  }
+  .frac-answer .frac-input:focus-visible{ outline: 2px solid var(--focus); outline-offset: 1px; }
+  .frac-answer .frac-slash{ font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 700; color: var(--ink-soft); }
+
+  .frac-prompt{
+    font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 700;
+    color: var(--ink); text-align: center;
+  }
+  .frac-prompt strong{ color: var(--accent); }
+
+  /* Comparison picker (reused from More & Less) */
+  .symbol-picker{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface); gap: 3px; flex-shrink: 0; }
+  .symbol-picker button{
+    width: 30px; height: 34px; border: none; background: transparent; border-radius: 7px;
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 17px; color: var(--ink-soft); cursor: pointer;
+  }
+  .symbol-picker button.is-selected{ background: var(--accent); color: var(--accent-ink); }
+  .symbol-picker button:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .print-blank-box{ display: none; }
+  .print-only-answer{ display: none; }
+
+  /* Print-only static answer areas */
+  .print-only{ display: none; }
+  .frac-blank-boxes{ display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .blank-box{ width: 34px; height: 34px; border: 1.5px solid var(--ink-faint); border-radius: 6px; }
+  .blank-slash{ font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 700; color: var(--ink-soft); }
+  .key-value{ display: none; }
+
+  .score-line{
+    margin-top: 6px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .frac-card{ background: #fff !important; border-color: var(--border) !important; }
+
+    .print-only{ display: block; }
+    .frac-answer{ display: none !important; }
+    .symbol-picker{ display: none !important; }
+    .print-blank-box{
+      display: flex !important; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 42px; height: 42px; border: 1.5px solid var(--ink); border-radius: 8px;
+    }
+
+    body.printing-answers .frac-blank-boxes{ display: none !important; }
+    body.printing-answers .key-value{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 17px; color: var(--good); text-align: center; }
+    body:not(.printing-answers) .key-value{ display: none !important; }
+    body:not(.printing-answers) .print-only-answer{ display: none !important; }
+    body.printing-answers .print-only-answer{ display: block !important; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 20px; color: var(--good); }
+
+    .shade-answer{ display: none; }
+    body.printing-answers .shade-blank{ display: none !important; }
+    body.printing-answers .shade-answer{ display: block !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Math</p>
+      <h1>Fractions Fun 🍕</h1>
+      <p>Visual fractions with pizza pies and chocolate bars &mdash; name the fraction, shade it in, or figure out which is more.</p>
+    </div>
+    <span class="badge" id="statusBadge">Name the fraction</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Fractions Fun settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Activity</span>
+      <div class="seg" role="radiogroup" aria-label="Activity">
+        <input type="radio" name="mode" id="mode-name" value="name" checked>
+        <label for="mode-name">Name the fraction</label>
+        <input type="radio" name="mode" id="mode-shade" value="shade">
+        <label for="mode-shade">Shade it in</label>
+        <input type="radio" name="mode" id="mode-compare" value="compare">
+        <label for="mode-compare">Which is more?</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Shape</span>
+      <div class="seg" role="radiogroup" aria-label="Shape">
+        <input type="radio" name="shape" id="shape-mixed" value="mixed" checked>
+        <label for="shape-mixed">Mixed</label>
+        <input type="radio" name="shape" id="shape-circle" value="circle">
+        <label for="shape-circle">Pizza (circle)</label>
+        <input type="radio" name="shape" id="shape-bar" value="bar">
+        <label for="shape-bar">Chocolate bar</label>
+      </div>
+    </div>
+
+    <div class="controls-row field-group">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label for="difficultySelect" style="font-size:13.5px; cursor:default;">Denominators:</label>
+        <select class="count-select" id="difficultySelect">
+          <option value="easy" selected>Halves &amp; quarters</option>
+          <option value="medium">Up to sixths</option>
+          <option value="hard">Up to eighths</option>
+        </select>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label for="countSelect" style="font-size:13.5px; cursor:default;">How many:</label>
+        <select class="count-select" id="countSelect">
+          <option value="6">6</option>
+          <option value="8" selected>8</option>
+          <option value="10">10</option>
+          <option value="12">12</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New Set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="checkBtn" type="button">Check my answers</button>
+        <button class="btn btn-ghost" id="printWorksheetBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="frac-section">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="title-block">
+          <h3>Fractions Fun</h3>
+          <div class="meta" id="sheetMeta">Name the fraction &middot; Halves &amp; quarters &middot; Mixed</div>
+        </div>
+        <div class="id-lines">
+          <div class="line"><span>Name</span><span class="rule"></span></div>
+          <div class="line"><span>Date</span><span class="rule"></span></div>
+        </div>
+      </div>
+
+      <p class="diff-hint no-print" id="shadeHint" style="display:none; margin:0 0 16px;">🖱️ Click a slice or segment to shade it in on screen. On a printed worksheet, she colors the parts in by hand instead.</p>
+
+      <div class="frac-grid" id="fracGrid"></div>
+
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">Each set is generated fresh &mdash; hit "New Set" any time for more practice.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DIFFICULTY = {
+    easy: [2, 4],
+    medium: [2, 3, 4, 5, 6],
+    hard: [2, 3, 4, 5, 6, 8]
+  };
+  var DIFF_LABEL = { easy: 'Halves & quarters', medium: 'Up to sixths', hard: 'Up to eighths' };
+  var SHAPE_LABEL = { mixed: 'Mixed', circle: 'Pizza', bar: 'Chocolate bar' };
+  var MODE_LABEL = { name: 'Name the fraction', shade: 'Shade it in', compare: 'Which is more?' };
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    shapeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="shape"]')),
+    difficultySelect: document.getElementById('difficultySelect'),
+    countSelect: document.getElementById('countSelect'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printWorksheetBtn: document.getElementById('printWorksheetBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    sheetMeta: document.getElementById('sheetMeta'),
+    grid: document.getElementById('fracGrid'),
+    scoreLine: document.getElementById('scoreLine'),
+    shadeHint: document.getElementById('shadeHint')
+  };
+
+  var items = [];        // { n, k, shapeType } for name/shade, or { left:{...}, right:{...} } for compare
+  var shadeStates = [];  // per-card boolean array, only used in "shade" mode
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'name';
+  }
+  function currentShape(){
+    var checked = els.shapeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'mixed';
+  }
+
+  function polar(cx, cy, r, angleDeg){
+    var rad = (angleDeg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+
+  function pieSvg(n, shaded, interactive, idx){
+    var cx = 100, cy = 100, r = 90;
+    var parts = [];
+    for (var i = 0; i < n; i++){
+      var startA = i * 360 / n;
+      var endA = (i + 1) * 360 / n;
+      var p0 = polar(cx, cy, r, startA);
+      var p1 = polar(cx, cy, r, endA);
+      var largeArc = (endA - startA) > 180 ? 1 : 0;
+      var d = 'M ' + cx + ' ' + cy + ' L ' + p0.x.toFixed(1) + ' ' + p0.y.toFixed(1) +
+              ' A ' + r + ' ' + r + ' 0 ' + largeArc + ' 1 ' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1) + ' Z';
+      parts.push('<path class="pie-slice' + (shaded[i] ? ' is-shaded' : '') + '" data-i="' + i + '" d="' + d + '"></path>');
+    }
+    var cls = 'frac-svg' + (interactive ? ' interactive' : '');
+    return '<svg class="' + cls + '" viewBox="0 0 200 200"' + (interactive ? ' role="img" aria-label="Click slices to shade them"' : ' aria-hidden="true"') + '>' + parts.join('') + '</svg>';
+  }
+
+  function barSvg(n, shaded, interactive, idx){
+    var W = 180, H = 90, x0 = 10, y0 = 55;
+    var segW = W / n;
+    var parts = [];
+    for (var i = 0; i < n; i++){
+      var x = x0 + i * segW;
+      parts.push('<rect class="bar-seg' + (shaded[i] ? ' is-shaded' : '') + '" data-i="' + i + '" x="' + x.toFixed(1) + '" y="' + y0 + '" width="' + segW.toFixed(1) + '" height="' + H + '"></rect>');
+    }
+    var cls = 'frac-svg' + (interactive ? ' interactive' : '');
+    return '<svg class="' + cls + '" viewBox="0 0 200 200"' + (interactive ? ' role="img" aria-label="Click segments to shade them"' : ' aria-hidden="true"') + '>' + parts.join('') + '</svg>';
+  }
+
+  function shapeSvg(shapeType, n, shaded, interactive, idx){
+    return shapeType === 'bar' ? barSvg(n, shaded, interactive, idx) : pieSvg(n, shaded, interactive, idx);
+  }
+
+  function contiguousShaded(n, k){
+    var arr = new Array(n).fill(false);
+    for (var i = 0; i < k; i++) arr[i] = true;
+    return arr;
+  }
+
+  function pickDenominator(){
+    var pool = DIFFICULTY[els.difficultySelect.value] || DIFFICULTY.medium;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function pickShapeType(){
+    var pref = currentShape();
+    if (pref === 'mixed') return Math.random() < 0.5 ? 'circle' : 'bar';
+    return pref;
+  }
+  function randomFraction(){
+    var n = pickDenominator();
+    var k = 1 + Math.floor(Math.random() * (n - 1));
+    return { n: n, k: k, shapeType: pickShapeType() };
+  }
+  function compareFractions(k1, n1, k2, n2){
+    var left = k1 * n2, right = k2 * n1;
+    if (left < right) return '<';
+    if (left > right) return '>';
+    return '=';
+  }
+
+  function generate(){
+    var mode = currentMode();
+    var count = parseInt(els.countSelect.value, 10);
+    items = [];
+    shadeStates = [];
+    for (var i = 0; i < count; i++){
+      if (mode === 'compare'){
+        items.push({ left: randomFraction(), right: randomFraction() });
+      } else {
+        var f = randomFraction();
+        items.push(f);
+        shadeStates.push(new Array(f.n).fill(false));
+      }
+    }
+    render(mode);
+  }
+
+  function wireShadeClicks(card, idx){
+    var svgEl = card.querySelector('.frac-svg.interactive');
+    if (!svgEl) return;
+    var segs = Array.prototype.slice.call(svgEl.querySelectorAll('[data-i]'));
+    segs.forEach(function(seg){
+      seg.addEventListener('click', function(){
+        var i = parseInt(seg.getAttribute('data-i'), 10);
+        shadeStates[idx][i] = !shadeStates[idx][i];
+        seg.classList.toggle('is-shaded', shadeStates[idx][i]);
+        card.classList.remove('is-correct', 'is-incorrect');
+        els.scoreLine.hidden = true;
+      });
+    });
+  }
+
+  function render(mode){
+    els.statusBadge.textContent = MODE_LABEL[mode];
+    els.sheetMeta.textContent = MODE_LABEL[mode] + ' · ' + DIFF_LABEL[els.difficultySelect.value] + ' · ' + SHAPE_LABEL[currentShape()];
+    els.shadeHint.style.display = mode === 'shade' ? '' : 'none';
+    els.grid.className = 'frac-grid' + (mode === 'compare' ? ' is-compare' : '');
+
+    els.grid.innerHTML = '';
+    items.forEach(function(item, idx){
+      var card = document.createElement('div');
+      card.className = 'frac-card';
+      card.dataset.index = idx;
+
+      if (mode === 'name'){
+        var shaded = contiguousShaded(item.n, item.k);
+        var svg = shapeSvg(item.shapeType, item.n, shaded, false);
+        var answerHtml =
+          '<div class="frac-answer">' +
+            '<input type="text" inputmode="numeric" maxlength="2" class="frac-input num" aria-label="Numerator" placeholder="?">' +
+            '<span class="frac-slash">/</span>' +
+            '<input type="text" inputmode="numeric" maxlength="2" class="frac-input den" aria-label="Denominator" placeholder="?">' +
+          '</div>';
+        var printHtml =
+          '<div class="print-only">' +
+            '<div class="frac-blank-boxes"><span class="blank-box"></span><span class="blank-slash">/</span><span class="blank-box"></span></div>' +
+            '<div class="key-value">' + item.k + '/' + item.n + '</div>' +
+          '</div>';
+        card.innerHTML = '<span class="num-badge">#' + (idx + 1) + '</span>' + svg + answerHtml + printHtml;
+        els.grid.appendChild(card);
+
+      } else if (mode === 'shade'){
+        var blankArr = shadeStates[idx];
+        var interactiveSvg = '<div class="no-print">' + shapeSvg(item.shapeType, item.n, blankArr, true, idx) + '</div>';
+        var promptHtml = '<div class="frac-prompt">Shade <strong>' + item.k + '/' + item.n + '</strong></div>';
+        var correctShaded = contiguousShaded(item.n, item.k);
+        var printHtml =
+          '<div class="print-only shade-blank">' + shapeSvg(item.shapeType, item.n, new Array(item.n).fill(false), false) + '</div>' +
+          '<div class="print-only shade-answer">' + shapeSvg(item.shapeType, item.n, correctShaded, false) + '</div>';
+        card.innerHTML = '<span class="num-badge">#' + (idx + 1) + '</span>' + promptHtml + interactiveSvg + printHtml;
+        els.grid.appendChild(card);
+        wireShadeClicks(card, idx);
+
+      } else {
+        var leftShaded = contiguousShaded(item.left.n, item.left.k);
+        var rightShaded = contiguousShaded(item.right.n, item.right.k);
+        var correctSym = compareFractions(item.left.k, item.left.n, item.right.k, item.right.n);
+        card.className = 'frac-card compare-card';
+        card.innerHTML =
+          '<div class="compare-shape">' + shapeSvg(item.left.shapeType, item.left.n, leftShaded, false) + '</div>' +
+          '<div class="symbol-picker" role="group" aria-label="Choose comparison symbol">' +
+            '<button type="button" data-sym="&lt;">&lt;</button>' +
+            '<button type="button" data-sym="=">=</button>' +
+            '<button type="button" data-sym="&gt;">&gt;</button>' +
+          '</div>' +
+          '<div class="print-blank-box"><span class="print-only-answer">' + correctSym + '</span></div>' +
+          '<div class="compare-shape">' + shapeSvg(item.right.shapeType, item.right.n, rightShaded, false) + '</div>';
+        var buttons = Array.prototype.slice.call(card.querySelectorAll('.symbol-picker button'));
+        buttons.forEach(function(btn){
+          btn.addEventListener('click', function(){
+            buttons.forEach(function(b){ b.classList.remove('is-selected'); });
+            btn.classList.add('is-selected');
+            card.classList.remove('is-correct', 'is-incorrect');
+            els.scoreLine.hidden = true;
+          });
+        });
+        els.grid.appendChild(card);
+      }
+    });
+
+    els.scoreLine.hidden = true;
+    Array.prototype.slice.call(els.grid.querySelectorAll('.frac-card')).forEach(function(c){
+      c.classList.remove('is-correct', 'is-incorrect');
+    });
+
+    if (mode === 'name'){
+      Array.prototype.slice.call(els.grid.querySelectorAll('input')).forEach(function(inp){
+        inp.addEventListener('input', function(){
+          var card = inp.closest('.frac-card');
+          card.classList.remove('is-correct', 'is-incorrect');
+          els.scoreLine.hidden = true;
+        });
+      });
+    }
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var mode = currentMode();
+    var cards = Array.prototype.slice.call(els.grid.querySelectorAll('.frac-card'));
+    var correctCount = 0;
+
+    cards.forEach(function(card, idx){
+      var ok = false;
+      if (mode === 'name'){
+        var numVal = card.querySelector('.num').value.trim();
+        var denVal = card.querySelector('.den').value.trim();
+        var it = items[idx];
+        ok = numVal !== '' && denVal !== '' && parseInt(numVal, 10) === it.k && parseInt(denVal, 10) === it.n;
+      } else if (mode === 'shade'){
+        var it2 = items[idx];
+        var shadedCount = shadeStates[idx].filter(Boolean).length;
+        ok = shadedCount === it2.k;
+      } else {
+        var selected = card.querySelector('.symbol-picker button.is-selected');
+        var it3 = items[idx];
+        var correctSym = compareFractions(it3.left.k, it3.left.n, it3.right.k, it3.right.n);
+        ok = !!selected && selected.getAttribute('data-sym').replace('&lt;', '<').replace('&gt;', '>') === correctSym;
+      }
+      card.classList.remove('is-correct', 'is-incorrect');
+      card.classList.add(ok ? 'is-correct' : 'is-incorrect');
+      if (ok) correctCount++;
+    });
+
+    var total = cards.length;
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correctCount === total
+      ? correctCount + ' out of ' + total + ' correct — fraction master! 🎉'
+      : correctCount + ' out of ' + total + ' correct — keep practicing!';
+  });
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', generate); });
+  els.shapeInputs.forEach(function(i){ i.addEventListener('change', generate); });
+  els.difficultySelect.addEventListener('change', generate);
+  els.countSelect.addEventListener('change', generate);
+  els.newBtn.addEventListener('click', generate);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printWorksheetBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  generate();
+})();
+</script>
