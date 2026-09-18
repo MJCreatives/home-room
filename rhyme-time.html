@@ -1,0 +1,570 @@
+<title>Rhyme Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #EEF1F6; --bg-line: #D9E0E9; --surface: #FFFFFF; --surface-soft: #F5F7FA;
+    --ink: #1B2733; --ink-soft: #5C6B7A; --ink-faint: #93A0AC; --border: #DCE3EB;
+    --accent: #C1443A; --accent-ink: #FFFFFF; --accent-soft: #F7E1DE; --accent-soft-border: #EBC0BA;
+    --focus: #2F6F8F; --shadow: 220 30% 20%;
+    --good: #2E7D5B; --good-soft: #E3F3EB; --good-border: #B9E0CA;
+    --bad: #C1443A; --bad-soft: #F7E1DE; --bad-border: #EBC0BA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+      --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+      --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+      --focus: #6FB4D8; --shadow: 220 40% 2%;
+      --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+      --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #141B23; --bg-line: #202B36; --surface: #1C2530; --surface-soft: #212B37;
+    --ink: #E8EDF2; --ink-soft: #9AAAB8; --ink-faint: #64717E; --border: #2B3644;
+    --accent: #E2685C; --accent-ink: #1B0F0D; --accent-soft: #3A2422; --accent-soft-border: #55302C;
+    --focus: #6FB4D8; --shadow: 220 40% 2%;
+    --good: #5FCB96; --good-soft: #16281F; --good-border: #2C4A38;
+    --bad: #E2685C; --bad-soft: #3A2422; --bad-border: #55302C;
+  }
+
+  *{ box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--bg-line) 0 1px, transparent 1px 28px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 24px 90px; }
+
+  .home-link{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; margin-bottom: 14px;
+  }
+  .home-link:hover{ color: var(--accent); }
+  .home-link:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .app-header{ display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .app-header h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px); margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  .app-header p{ margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 54ch; }
+  .badge{
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; background: var(--surface); white-space: nowrap;
+  }
+
+  .panel{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .panel + .panel{ margin-top: 20px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .field-hint{ margin: 10px 0 0; font-size: 13px; color: var(--ink-faint); }
+
+  .seg{ display: inline-flex; border: 1.5px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface-soft); gap: 3px; flex-wrap: wrap; }
+  .seg input{ position: absolute; opacity: 0; pointer-events: none; }
+  .seg label{
+    padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer;
+    color: var(--ink-soft); transition: background .15s ease, color .15s ease;
+  }
+  .seg input:checked + label{ background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .family-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+  .family-chip{ position: relative; }
+  .family-chip input{ position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .family-chip label{
+    display: flex; align-items: center; justify-content: center; height: 42px;
+    border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 14px; color: var(--ink-soft);
+    cursor: pointer; transition: border-color .12s ease, background .12s ease, color .12s ease;
+  }
+  .family-chip input:checked + label{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .family-chip input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  select.count-select{
+    font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--ink);
+    background: var(--surface-soft); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+
+  .btn{
+    font: inherit; font-weight: 600; font-size: 13.5px; border-radius: 10px; padding: 10px 18px;
+    border: 1.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .btn-ghost{ background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-small{ font-size: 12.5px; padding: 7px 13px; }
+
+  .actions-row{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; flex-wrap: wrap; }
+  .toolbar-btns{ display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .sheet-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 32px 0 14px; flex-wrap: wrap; }
+  .sheet-toolbar h2{ font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin: 0; }
+
+  .sheet{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
+  }
+  .print-title{ display: none; }
+  .print-id-line{ display: none; }
+  .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
+
+  .questions{ display: flex; flex-direction: column; gap: 22px; }
+  .question .q-text{ font-size: 15.5px; font-weight: 600; margin: 0 0 10px; }
+  .question .q-text strong{ color: var(--accent); }
+  .options{ display: flex; flex-direction: column; gap: 8px; }
+  .option-row{ position: relative; }
+  .option-row input{ position: absolute; opacity: 0; pointer-events: none; }
+  .option-row label{
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface-soft);
+    cursor: pointer; font-size: 14.5px; color: var(--ink); transition: border-color .12s ease, background .12s ease;
+  }
+  .option-row .letter{
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink-faint);
+    display: flex; align-items: center; justify-content: center; font-family: "IBM Plex Mono", monospace;
+    font-weight: 700; font-size: 12.5px; color: var(--ink-soft);
+  }
+  .option-row input:checked + label{ border-color: var(--focus); background: var(--surface); }
+  .option-row input:checked + label .letter{ border-color: var(--focus); color: var(--focus); }
+  .option-row input:focus-visible + label{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .option-row.is-correct label{ border-color: var(--good-border); background: var(--good-soft); }
+  .option-row.is-correct label .letter{ border-color: var(--good); background: var(--good); color: #fff; }
+  .option-row.is-incorrect label{ border-color: var(--bad-border); background: var(--bad-soft); }
+  .option-row.is-incorrect label .letter{ border-color: var(--bad); background: var(--bad); color: #fff; }
+
+  .score-line{
+    margin-top: 6px; padding: 12px 16px; border-radius: 10px; background: var(--surface-soft);
+    border: 1px solid var(--border); font-size: 14px; font-weight: 600; text-align: center;
+  }
+
+  footer.page-footer{ margin-top: 40px; text-align: center; font-size: 12.5px; color: var(--ink-faint); }
+
+  @media print{
+    body{ background: #fff !important; }
+    .no-print{ display: none !important; }
+    .wrap{ max-width: none; padding: 0; margin: 0; }
+    .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
+    .sheet-toolbar{ display: none !important; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 4px; }
+    .print-id-line{ display: flex; gap: 28px; font-size: 13px; color: var(--ink-soft); margin: 0 0 20px; flex-wrap: wrap; }
+    .print-id-line .line{ display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 160px; }
+    .print-id-line .line span{ white-space: nowrap; }
+    .print-id-line .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
+
+    /* Worksheet print: always show blank, unselected options regardless of on-screen state */
+    body:not(.printing-answers) .option-row label{ border-color: var(--border) !important; background: #fff !important; }
+    body:not(.printing-answers) .option-row .letter{ border-color: var(--ink-faint) !important; background: #fff !important; color: var(--ink-soft) !important; }
+
+    /* Answer key print: mark the correct option, ignore selection state */
+    body.printing-answers .option-row:not(.is-answer) label{ border-color: var(--border) !important; background: #fff !important; }
+    body.printing-answers .option-row:not(.is-answer) .letter{ border-color: var(--ink-faint) !important; background: #fff !important; color: var(--ink-soft) !important; }
+    body.printing-answers .option-row.is-answer label{ border-color: var(--good-border) !important; background: var(--good-soft) !important; }
+    body.printing-answers .option-row.is-answer .letter{ border-color: var(--good) !important; background: var(--good) !important; color: #fff !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="home-link no-print" href="index.html">&larr; Home Room</a>
+
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Reading &amp; Writing</p>
+      <h1>Rhyme Time 👂</h1>
+      <p>Pick word families, build a set of rhyming questions, and answer them on screen or on paper &mdash; self-checking with a printable answer key.</p>
+    </div>
+    <span class="badge" id="statusBadge">Which one rhymes?</span>
+  </header>
+
+  <section class="panel no-print" aria-labelledby="controls-heading">
+    <h2 id="controls-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Rhyme Time settings</h2>
+
+    <div class="field-group">
+      <span class="field-label">Activity</span>
+      <div class="seg" role="radiogroup" aria-label="Activity">
+        <input type="radio" name="mode" id="mode-rhyme" value="rhyme" checked>
+        <label for="mode-rhyme">Which one rhymes?</label>
+        <input type="radio" name="mode" id="mode-odd" value="odd">
+        <label for="mode-odd">Odd one out</label>
+      </div>
+      <p class="field-hint" id="modeHint"></p>
+    </div>
+
+    <div class="field-group">
+      <span class="field-label">Word families &mdash; click to select</span>
+      <div class="family-grid" id="familyGrid"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button class="btn btn-ghost btn-small" id="selectAllBtn" type="button">Select all</button>
+        <button class="btn btn-ghost btn-small" id="clearAllBtn" type="button">Clear selection</button>
+        <button class="btn btn-ghost btn-small" id="easyBtn" type="button">Just the easy families</button>
+      </div>
+      <p class="field-hint">Word families are groups of words that share the same ending sound and spelling, like cat / hat / mat &mdash; a classic building block for phonics and rhyming.</p>
+    </div>
+
+    <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label for="problemCount" style="font-size:13.5px; cursor:default;">How many questions:</label>
+        <select class="count-select" id="problemCount">
+          <option value="6">6</option>
+          <option value="8" selected>8</option>
+          <option value="10">10</option>
+          <option value="12">12</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" id="newBtn" type="button">🎲 New set</button>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost no-print" id="checkBtn" type="button">Check my answers</button>
+        <button class="btn btn-ghost" id="printBtn" type="button">Print worksheet</button>
+        <button class="btn btn-ghost" id="printAnswersBtn" type="button">Print answer key</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sheet-toolbar no-print">
+    <h2>Preview</h2>
+  </div>
+
+  <section class="body-section">
+    <div class="sheet" id="sheetBody">
+      <div class="print-title" id="printTitle">Rhyme Time</div>
+      <div class="print-id-line">
+        <div class="line"><span>Name</span><span class="rule"></span></div>
+        <div class="line"><span>Date</span><span class="rule"></span></div>
+      </div>
+      <div class="questions" id="questions"></div>
+      <div class="score-line no-print" id="scoreLine" hidden></div>
+    </div>
+  </section>
+
+  <footer class="page-footer no-print">New sets are generated fresh each time &mdash; hit "New set" any time for more practice.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var FAMILIES = {
+    "-at": ["cat", "hat", "mat", "bat", "rat", "sat", "pat", "fat"],
+    "-an": ["can", "man", "fan", "pan", "van", "ran", "tan", "plan"],
+    "-ig": ["pig", "big", "dig", "fig", "wig", "jig"],
+    "-op": ["hop", "top", "pop", "mop", "cop", "stop", "shop", "drop"],
+    "-ug": ["bug", "hug", "rug", "mug", "tug", "dug", "jug"],
+    "-ell": ["bell", "sell", "tell", "well", "shell", "smell", "spell", "yell"],
+    "-ake": ["cake", "lake", "make", "rake", "snake", "wake", "shake", "bake"],
+    "-ing": ["ring", "sing", "king", "wing", "swing", "thing", "string"],
+    "-ock": ["rock", "sock", "lock", "block", "clock", "dock", "knock"],
+    "-ail": ["tail", "mail", "nail", "sail", "snail", "pail", "trail"]
+  };
+
+  var EASY_FAMILIES = ["-at", "-an", "-ig", "-op", "-ug"];
+
+  // Distractor words that don't rhyme with any word family above.
+  var FILLERS = ["dog", "sun", "tree", "book", "milk", "star", "fish", "frog", "house", "moon", "chair", "shoe", "cloud", "leaf", "spoon", "drum"];
+
+  var MODE_HINT = {
+    rhyme: "Read the word, then pick the option that rhymes with it.",
+    odd: "Two of the three words rhyme with each other — pick the one that doesn't."
+  };
+
+  var LETTERS = ["A", "B", "C"];
+
+  var els = {
+    modeInputs: Array.prototype.slice.call(document.querySelectorAll('input[name="mode"]')),
+    modeHint: document.getElementById('modeHint'),
+    familyGrid: document.getElementById('familyGrid'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
+    clearAllBtn: document.getElementById('clearAllBtn'),
+    easyBtn: document.getElementById('easyBtn'),
+    problemCount: document.getElementById('problemCount'),
+    newBtn: document.getElementById('newBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    printBtn: document.getElementById('printBtn'),
+    printAnswersBtn: document.getElementById('printAnswersBtn'),
+    statusBadge: document.getElementById('statusBadge'),
+    contentWrap: document.getElementById('questions'),
+    sheetBody: document.getElementById('sheetBody'),
+    scoreLine: document.getElementById('scoreLine')
+  };
+
+  var selectedFamilies = EASY_FAMILIES.slice();
+  var problems = [];
+  var selections = {};
+
+  function currentMode(){
+    var checked = els.modeInputs.filter(function(i){ return i.checked; })[0];
+    return checked ? checked.value : 'rhyme';
+  }
+
+  function buildFamilyGrid(){
+    els.familyGrid.innerHTML = '';
+    Object.keys(FAMILIES).forEach(function(fam){
+      var wrap = document.createElement('div');
+      wrap.className = 'family-chip';
+      var id = 'fam-' + fam.replace(/[^a-z]/g, '');
+      wrap.innerHTML = '<input type="checkbox" id="' + id + '" value="' + fam + '"><label for="' + id + '">' + fam + '</label>';
+      els.familyGrid.appendChild(wrap);
+    });
+    Array.prototype.slice.call(els.familyGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if (inp.checked){
+          if (selectedFamilies.indexOf(inp.value) === -1) selectedFamilies.push(inp.value);
+        } else {
+          selectedFamilies = selectedFamilies.filter(function(v){ return v !== inp.value; });
+        }
+        newSet();
+      });
+    });
+    syncFamilyChips();
+  }
+  function syncFamilyChips(){
+    Array.prototype.slice.call(els.familyGrid.querySelectorAll('input')).forEach(function(inp){
+      inp.checked = selectedFamilies.indexOf(inp.value) !== -1;
+    });
+  }
+  els.selectAllBtn.addEventListener('click', function(){ selectedFamilies = Object.keys(FAMILIES); syncFamilyChips(); newSet(); });
+  els.clearAllBtn.addEventListener('click', function(){ selectedFamilies = []; syncFamilyChips(); newSet(); });
+  els.easyBtn.addEventListener('click', function(){ selectedFamilies = EASY_FAMILIES.slice(); syncFamilyChips(); newSet(); });
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function wordPool(){
+    var words = [];
+    selectedFamilies.forEach(function(fam){
+      FAMILIES[fam].forEach(function(w){ words.push(w); });
+    });
+    return words;
+  }
+
+  function otherFamiliesWords(excludeFam){
+    var words = [];
+    selectedFamilies.forEach(function(fam){
+      if (fam === excludeFam) return;
+      FAMILIES[fam].forEach(function(w){ words.push(w); });
+    });
+    return words.concat(FILLERS);
+  }
+
+  function buildRhymeQuestion(){
+    var famsWithPairs = selectedFamilies.filter(function(f){ return FAMILIES[f].length >= 2; });
+    if (!famsWithPairs.length) return null;
+    var fam = pick(famsWithPairs);
+    var words = FAMILIES[fam];
+    var target = pick(words);
+    var rhymeChoices = words.filter(function(w){ return w !== target; });
+    var rhymeWord = pick(rhymeChoices);
+
+    var distractorPool = shuffle(otherFamiliesWords(fam));
+    var distractors = [];
+    for (var i = 0; i < distractorPool.length && distractors.length < 2; i++){
+      var w = distractorPool[i];
+      if (w !== target && w !== rhymeWord && distractors.indexOf(w) === -1) distractors.push(w);
+    }
+    while (distractors.length < 2){ distractors.push(pick(FILLERS)); }
+
+    var options = shuffle([rhymeWord, distractors[0], distractors[1]]);
+    return {
+      q: 'Which word rhymes with <strong>' + target + '</strong>?',
+      options: options,
+      correct: options.indexOf(rhymeWord),
+      dedupeKey: 'rhyme:' + target
+    };
+  }
+
+  function buildOddOneOutQuestion(){
+    var famsWithPairs = selectedFamilies.filter(function(f){ return FAMILIES[f].length >= 2; });
+    if (!famsWithPairs.length) return null;
+    var fam = pick(famsWithPairs);
+    var words = shuffle(FAMILIES[fam]);
+    var word1 = words[0], word2 = words[1];
+
+    var oddPool = shuffle(otherFamiliesWords(fam));
+    var oddWord = oddPool.length ? oddPool[0] : pick(FILLERS);
+
+    var options = shuffle([word1, word2, oddWord]);
+    return {
+      q: 'Which word does <strong>NOT</strong> rhyme with the others?',
+      options: options,
+      correct: options.indexOf(oddWord),
+      dedupeKey: 'odd:' + fam + ':' + oddWord
+    };
+  }
+
+  function newSet(){
+    var mode = currentMode();
+    var n = parseInt(els.problemCount.value, 10);
+    problems = [];
+    selections = {};
+    if (!selectedFamilies.length){ render(); return; }
+
+    var lastKey = null;
+    for (var i = 0; i < n; i++){
+      var q = null;
+      for (var attempt = 0; attempt < 6; attempt++){
+        q = mode === 'rhyme' ? buildRhymeQuestion() : buildOddOneOutQuestion();
+        if (!q) break;
+        if (q.dedupeKey !== lastKey) break;
+      }
+      if (!q) break;
+      lastKey = q.dedupeKey;
+      problems.push(q);
+    }
+    render();
+  }
+
+  function render(){
+    var mode = currentMode();
+    els.modeHint.textContent = MODE_HINT[mode];
+    els.statusBadge.textContent = mode === 'rhyme' ? 'Which one rhymes?' : 'Odd one out';
+    els.scoreLine.hidden = true;
+    els.sheetBody.className = 'sheet';
+    els.contentWrap.innerHTML = '';
+
+    if (!selectedFamilies.length){
+      els.contentWrap.innerHTML = '<div class="empty-state">Select some word families above to build a rhyming set.</div>';
+      return;
+    }
+    if (!problems.length){
+      els.contentWrap.innerHTML = '<div class="empty-state">Click "New set" to generate questions.</div>';
+      return;
+    }
+
+    problems.forEach(function(item, qIdx){
+      var qWrap = document.createElement('div');
+      qWrap.className = 'question';
+      var qText = document.createElement('p');
+      qText.className = 'q-text';
+      qText.innerHTML = (qIdx + 1) + '. ' + item.q;
+      qWrap.appendChild(qText);
+
+      var optsWrap = document.createElement('div');
+      optsWrap.className = 'options';
+
+      item.options.forEach(function(opt, oIdx){
+        var row = document.createElement('div');
+        row.className = 'option-row';
+        if (oIdx === item.correct) row.classList.add('is-answer');
+        var inputId = 'q' + qIdx + '-o' + oIdx;
+        row.innerHTML =
+          '<input type="radio" name="q' + qIdx + '" id="' + inputId + '" value="' + oIdx + '">' +
+          '<label for="' + inputId + '"><span class="letter">' + LETTERS[oIdx] + '</span><span>' + opt + '</span></label>';
+        var input = row.querySelector('input');
+        input.addEventListener('change', function(){
+          selections[qIdx] = oIdx;
+          clearChecks();
+        });
+        optsWrap.appendChild(row);
+      });
+
+      qWrap.appendChild(optsWrap);
+      els.contentWrap.appendChild(qWrap);
+    });
+  }
+
+  function clearChecks(){
+    Array.prototype.slice.call(els.contentWrap.querySelectorAll('.option-row')).forEach(function(row){
+      row.classList.remove('is-correct', 'is-incorrect');
+    });
+    els.scoreLine.hidden = true;
+  }
+
+  els.checkBtn.addEventListener('click', function(){
+    var rows = Array.prototype.slice.call(els.contentWrap.querySelectorAll('.question'));
+    if (!rows.length) return;
+    var correctCount = 0;
+    rows.forEach(function(qWrap, qIdx){
+      var picked = selections[qIdx];
+      var optionRows = Array.prototype.slice.call(qWrap.querySelectorAll('.option-row'));
+      optionRows.forEach(function(row, oIdx){
+        row.classList.remove('is-correct', 'is-incorrect');
+        var isAnswer = row.classList.contains('is-answer');
+        if (picked === oIdx){
+          row.classList.add(isAnswer ? 'is-correct' : 'is-incorrect');
+        } else if (isAnswer && picked !== undefined){
+          row.classList.add('is-correct');
+        }
+      });
+      if (picked === problems[qIdx].correct) correctCount++;
+    });
+    var total = problems.length;
+    els.scoreLine.hidden = false;
+    els.scoreLine.textContent = correctCount === total
+      ? correctCount + ' out of ' + total + ' correct — great listening! 🎉'
+      : correctCount + ' out of ' + total + ' correct — nice try!';
+  });
+
+  els.modeInputs.forEach(function(i){ i.addEventListener('change', newSet); });
+  els.newBtn.addEventListener('click', newSet);
+  els.problemCount.addEventListener('change', newSet);
+
+  /* ---------- Print ---------- */
+  function printInNewWindow(bodyClass){
+    var bodyClone = document.body.cloneNode(true);
+    Array.prototype.slice.call(bodyClone.querySelectorAll('script')).forEach(function(s){ s.remove(); });
+    var printWin = window.open('', '_blank');
+    if (!printWin){
+      document.body.classList.add(bodyClass);
+      window.print();
+      document.body.classList.remove(bodyClass);
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(
+      '<!doctype html><html><head><meta charset="utf-8">' + document.head.innerHTML + '</head>' +
+      '<body class="' + bodyClass + '">' + bodyClone.innerHTML + '</body></html>'
+    );
+    printWin.document.close();
+    var fired = false;
+    function go(){ if (fired) return; fired = true; printWin.focus(); printWin.print(); }
+    printWin.onload = function(){ setTimeout(go, 200); };
+    setTimeout(go, 700);
+    printWin.onafterprint = function(){ try { printWin.close(); } catch(e){} };
+  }
+
+  els.printBtn.addEventListener('click', function(){ printInNewWindow(''); });
+  els.printAnswersBtn.addEventListener('click', function(){ printInNewWindow('printing-answers'); });
+
+  buildFamilyGrid();
+  newSet();
+})();
+</script>
