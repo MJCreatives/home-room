@@ -136,6 +136,7 @@
     box-shadow: 0 1px 2px hsl(var(--shadow) / 0.06), 0 8px 24px hsl(var(--shadow) / 0.08);
   }
   .print-title{ display: none; }
+  .print-id-line{ display: none; }
   .empty-state{ text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 14px; }
 
   /* ---------- Trace mode ---------- */
@@ -143,7 +144,8 @@
   .trace-row:first-child{ border-top: none; }
   .ref-svg-wrap{ width: 64px; height: 82px; flex-shrink: 0; }
   .ref-svg-wrap svg{ width: 100%; height: 100%; }
-  .trace-line-wrap{ flex: 1; min-width: 240px; position: relative; height: 82px; }
+  .trace-stack{ flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 10px; }
+  .trace-line-wrap{ position: relative; height: 82px; }
   .primary-lines{ position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; }
   .primary-lines .rule{ border-bottom: 1.5px solid var(--ink-faint); height: 0; }
   .primary-lines .rule.mid{ border-bottom: 1px dashed var(--border); }
@@ -183,7 +185,11 @@
     .wrap{ max-width: none; padding: 0; margin: 0; }
     .sheet{ box-shadow: none; border: none; border-radius: 0; padding: 0; }
     .sheet-toolbar{ display: none !important; }
-    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 8px; }
+    .print-title{ display: block; font-family: "Fraunces", serif; font-size: 22px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 4px; }
+    .print-id-line{ display: flex; gap: 28px; font-size: 13px; color: var(--ink-soft); margin: 0 0 20px; flex-wrap: wrap; }
+    .print-id-line .line{ display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 160px; }
+    .print-id-line .line span{ white-space: nowrap; }
+    .print-id-line .line .rule{ flex: 1; border-bottom: 1px solid var(--ink-faint); height: 1px; }
     .count-card{ background: #fff !important; border-color: var(--border) !important; }
     .count-answer input{ display: none !important; }
     body:not(.printing-answers) .print-only-answer{ display: none !important; }
@@ -240,6 +246,12 @@
           </select>
         </div>
       </div>
+      <div class="field-group" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div class="check-row">
+          <input type="checkbox" id="blankLine" checked>
+          <label for="blankLine">Add a blank practice line under each row</label>
+        </div>
+      </div>
     </div>
 
     <div id="countControls" style="display:none;">
@@ -280,6 +292,10 @@
   <section class="body-section">
     <div class="sheet" id="sheetBody">
       <div class="print-title" id="printTitle">Count &amp; Trace</div>
+      <div class="print-id-line">
+        <div class="line"><span>Name</span><span class="rule"></span></div>
+        <div class="line"><span>Date</span><span class="rule"></span></div>
+      </div>
       <div id="contentWrap"></div>
       <div class="score-line no-print" id="scoreLine" hidden></div>
     </div>
@@ -334,6 +350,7 @@
     selectAllBtn: document.getElementById('selectAllBtn'),
     clearAllBtn: document.getElementById('clearAllBtn'),
     showArrows: document.getElementById('showArrows'),
+    blankLine: document.getElementById('blankLine'),
     traceRepeats: document.getElementById('traceRepeats'),
     maxCount: document.getElementById('maxCount'),
     problemCount: document.getElementById('problemCount'),
@@ -385,6 +402,7 @@
   els.clearAllBtn.addEventListener('click', function(){ sequence = []; render(); });
   els.showArrows.addEventListener('change', render);
   els.traceRepeats.addEventListener('change', render);
+  els.blankLine.addEventListener('change', render);
 
   function shuffle(arr){
     var a = arr.slice();
@@ -424,6 +442,7 @@
       syncDigitChips();
       var showArrows = els.showArrows.checked;
       var repeats = parseInt(els.traceRepeats.value, 10);
+      var blankLine = els.blankLine.checked;
       els.contentWrap.innerHTML = '';
       if (!sequence.length){
         els.contentWrap.innerHTML = '<div class="empty-state">Select some numbers above to build a practice sheet.</div>';
@@ -436,11 +455,17 @@
         for (var i = 0; i < repeats; i++){
           digitsHtml += strokesToSvg(DIGITS[d].strokes, i === 0 ? (showArrows ? 'arrows' : 'plain') : 'faded');
         }
+        var blankLineHtml = blankLine
+          ? '<div class="trace-line-wrap"><div class="primary-lines"><div class="rule"></div><div class="rule mid"></div><div class="rule"></div></div></div>'
+          : '';
         row.innerHTML =
           '<div class="ref-svg-wrap">' + strokesToSvg(DIGITS[d].strokes, showArrows ? 'arrows' : 'plain') + '</div>' +
-          '<div class="trace-line-wrap">' +
-            '<div class="primary-lines"><div class="rule"></div><div class="rule mid"></div><div class="rule"></div></div>' +
-            '<div class="trace-digits">' + digitsHtml + '</div>' +
+          '<div class="trace-stack">' +
+            '<div class="trace-line-wrap">' +
+              '<div class="primary-lines"><div class="rule"></div><div class="rule mid"></div><div class="rule"></div></div>' +
+              '<div class="trace-digits">' + digitsHtml + '</div>' +
+            '</div>' +
+            blankLineHtml +
           '</div>';
         els.contentWrap.appendChild(row);
       });
